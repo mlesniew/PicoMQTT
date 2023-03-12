@@ -4,49 +4,10 @@
 
 namespace NanoMQTT {
 
-Client::Client(::Client & client, size_t buffer_size, uint16_t keep_alive_millis) :
-    client(client, 15 * 1000),
-    buffer(buffer_size),
-    keep_alive_millis(keep_alive_millis) {
+Client::Client(::Client & client, size_t buffer_size, unsigned long keep_alive_seconds,
+               unsigned long socket_timeout_seconds)
+    : Connection(client, buffer_instance, keep_alive_seconds, socket_timeout_seconds), buffer_instance(buffer_size) {
     TRACE_FUNCTION
-}
-
-OutgoingPacket Client::build_packet(Packet::Type type, uint8_t flags, size_t length) {
-    TRACE_FUNCTION
-    return OutgoingPacket(client, buffer, type, flags, length);
-}
-
-void Client::on_message_too_big(IncomingPacket & packet) {
-    TRACE_FUNCTION
-}
-
-void Client::on_message(const char * topic, const char * payload, size_t payload_size) {
-    TRACE_FUNCTION
-}
-
-void Client::on_message(const char * topic, IncomingPacket & packet) {
-    TRACE_FUNCTION
-    const auto payload = buffer.read(packet, packet.get_remaining_size());
-    if (buffer.is_overflown()) {
-        on_message_too_big(packet);
-    } else {
-        on_message(topic, payload.buffer, payload.size);
-    }
-}
-
-void Client::on_timeout() {
-    TRACE_FUNCTION
-    client.stop();
-}
-
-void Client::on_protocol_violation() {
-    TRACE_FUNCTION
-    client.stop();
-}
-
-void Client::on_disconnect() {
-    TRACE_FUNCTION
-    client.stop();
 }
 
 bool Client::connect(
@@ -65,7 +26,7 @@ bool Client::connect(
     TRACE_FUNCTION
 
     if (connect_return_code) {
-        *connect_return_code = crc_undefined;
+        *connect_return_code = CRC_UNDEFINED;
     }
 
     client.stop();
@@ -74,7 +35,7 @@ bool Client::connect(
         return false;
     }
 
-    messageIdGenerator.reset();
+    message_id_generator.reset();
 
     const bool will = will_topic && will_message;
 
@@ -147,142 +108,46 @@ bool Client::connect(
     return client.connected();
 }
 
-bool Client::send_simple_packet(Packet::Type type, uint8_t flags) {
+void Client::on_message(const char * topic, const char * payload, size_t payload_size) {
     TRACE_FUNCTION
-    return build_packet(type, flags, 0).send();
 }
 
-void Client::handle_packet(IncomingPacket & packet) {
+void Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
-
-    buffer.reset();
-
-    switch (packet.get_type()) {
-        case Packet::CONNECT:
-            // only allowed on servers
-            on_protocol_violation();
-            return;
-
-        case Packet::CONNACK:
-            // ok only after connect
-            on_protocol_violation();
-            return;
-
-        case Packet::PUBLISH: {
-            const char * topic = buffer.read_string(packet, packet.read_u16());
-
-            // const bool dup = (packet.get_flags() >> 3) & 0b1;
-            const uint8_t qos = (packet.get_flags() >> 1) & 0b11;
-            // const bool retain = packet.get_flags() & 0b1;
-
-            const bool ack_needed = (qos == 1);
-            const uint16_t msg_id = ack_needed ? packet.read_u16() : 0;
-
-            if (buffer.is_overflown()) {
-                on_message_too_big(packet);
-            } else {
-                on_message(topic, packet);
-            }
-
-            if (ack_needed) {
-                auto packet = build_packet(Packet::PUBACK, 0, 2);
-                packet.write_u16(msg_id);
-                packet.send();
-            }
-        };
-        return;
-
-        case Packet::PUBACK:
-            // only allowed after publish
-            on_protocol_violation();
-            return;
-
-        case Packet::PUBREC:
-        case Packet::PUBREL:
-        case Packet::PUBCOMP:
-            // we should never see these messages since we only subscribe with QoS 0 and 1
-            on_protocol_violation();
-            return;
-
-        case Packet::SUBSCRIBE:
-        case Packet::UNSUBSCRIBE:
-            on_protocol_violation();
-            return;
-
-        case Packet::SUBACK:
-        case Packet::UNSUBACK:
-            // only allowed after matching subscribe / unsubscribe
-            on_protocol_violation();
-            return;
-
-        case Packet::PINGREQ:
-            return;
-
-        case Packet::PINGRESP:
-            // only allowed after ping request
-            on_protocol_violation();
-            return;
-
-        case Packet::DISCONNECT:
-            on_disconnect();
-            return;
-
-        default:
-            on_protocol_violation();
-            return;
-    }
-}
-
-void Client::wait_for_reply(Packet::Type type, std::function<void(IncomingPacket & packet)> handler) {
-    TRACE_FUNCTION
-
-    const unsigned long start = millis();
-
-    while (client.connected() && (millis() - start < client.read_timeout_millis)) {
-
-        IncomingPacket packet(client);
-        if (!packet) {
-            break;
-        }
-
-        if (packet.get_type() == type) {
-            handler(packet);
-            return;
-        }
-
-        handle_packet(packet);
-
-    }
-
-    if (client.connected()) {
-        on_timeout();
+    const auto payload = buffer.read(packet, packet.get_remaining_size());
+    if (buffer.is_overflown()) {
+        on_message_too_big(packet);
+    } else {
+        on_message(topic, payload.buffer, payload.size);
     }
 }
 
 void Client::loop() {
     TRACE_FUNCTION
 
-    if (!client.connected()) {
-        return;
-    }
-
-    if (client.get_millis_since_last_write() >= keep_alive_millis) {
+    if (client.connected() && client.get_millis_since_last_write() >= keep_alive_millis) {
         // ping time!
-        send_simple_packet(Packet::PINGREQ);
+        build_packet(Packet::PINGREQ).send();
         wait_for_reply(Packet::PINGRESP, [](IncomingPacket &) {});
     }
 
-    while (client.available()) {
-        IncomingPacket packet(client);
-        if (!packet) {
-            return;
-        }
-
-        handle_packet(packet);
-    }
+    Connection::loop();
 }
 
-bool Client::confirm_publish(const Client::Publish & publish) {
+Publisher::Publish Client::publish(const char * topic, const size_t payload_size,
+                                   uint8_t qos, bool retain, uint16_t message_id) {
+    TRACE_FUNCTION
+    return Publish(
+               *this, client, buffer,
+               topic, payload_size,
+               (qos >= 1) ? 1 : 0,
+               retain,
+               message_id,  // dup if message_id is non-zero
+               message_id ? message_id : message_id_generator.generate()  // generate only if message_id == 0
+           );
+}
+
+bool Client::on_publish_complete(const Publish & publish) {
     TRACE_FUNCTION
     if (publish.qos == 0) {
         return true;
@@ -296,75 +161,6 @@ bool Client::confirm_publish(const Client::Publish & publish) {
     return confirmed;
 }
 
-Client::Publish::Publish(Client & mqtt,
-                         const char * topic, size_t topic_size, size_t payload_size,
-                         uint8_t qos, bool retain, bool dup)
-    :
-    OutgoingPacket(
-        mqtt.client,
-        mqtt.buffer,
-        Packet::PUBLISH,
-        (dup ? 0b1000 : 0) | ((qos & 0b11) << 1) | (retain ? 1 : 0),
-        2 + topic_size + (qos ? 2 : 0) + payload_size),
-    qos(qos),
-    message_id(qos ? mqtt.messageIdGenerator.generate() : 0),
-    mqtt(mqtt) {
-    TRACE_FUNCTION
-
-    write_string(topic, topic_size);
-    if (qos) {
-        write_u16(message_id);
-    }
-}
-
-bool Client::Publish::send() {
-    TRACE_FUNCTION
-    return OutgoingPacket::send() && mqtt.confirm_publish(*this);
-}
-
-Client::Publish Client::publish(const char * topic, const size_t payload_size,
-                                uint8_t qos, bool retain, bool dup) {
-    TRACE_FUNCTION
-    return Publish(
-               *this,
-               topic, strlen(topic), payload_size,
-               (qos >= 1) ? 1 : 0, retain, dup);
-}
-
-bool Client::publish(const char * topic, const void * payload, const size_t payload_size,
-                     uint8_t qos, bool retain, bool dup) {
-    TRACE_FUNCTION
-    auto packet = publish(topic, payload_size, qos, retain, dup);
-    packet.write(payload, payload_size);
-    return packet.send();
-}
-
-bool Client::publish(const char * topic, const char * payload,
-                     uint8_t qos, bool retain, bool dup) {
-    TRACE_FUNCTION
-    return publish(topic, payload, strlen(payload), qos, retain, dup);
-}
-
-bool Client::publish(const String & topic, const String & payload,
-                     uint8_t qos, bool retain, bool dup) {
-    TRACE_FUNCTION
-    return publish(topic.c_str(), payload.c_str(), qos, retain, dup);
-}
-
-bool Client::publish_P(const char * topic, const void * payload, const size_t payload_size,
-                       uint8_t qos, bool retain, bool dup) {
-    TRACE_FUNCTION;
-    auto packet = publish(topic, payload_size, qos, retain, dup);
-    packet.write_P(payload, payload_size);
-    return packet.send();
-}
-
-bool Client::publish_P(const char * topic, const char * payload,
-                       uint8_t qos, bool retain, bool dup) {
-    TRACE_FUNCTION
-    return publish_P(topic, payload, strlen_P(payload), qos, retain, dup);
-}
-
 bool Client::subscribe(const String & topic, uint8_t qos, uint8_t * qos_granted) {
     TRACE_FUNCTION
     if (qos > 1) {
@@ -372,7 +168,7 @@ bool Client::subscribe(const String & topic, uint8_t qos, uint8_t * qos_granted)
     }
 
     const size_t topic_size = topic.length();
-    const uint16_t message_id = messageIdGenerator.generate();
+    const uint16_t message_id = message_id_generator.generate();
 
     auto packet = build_packet(Packet::SUBSCRIBE, 0b0010, 2 + 2 + topic_size + 1);
     packet.write_u16(message_id);
@@ -405,7 +201,7 @@ bool Client::unsubscribe(const String & topic) {
     TRACE_FUNCTION
 
     const size_t topic_size = topic.length();
-    const uint16_t message_id = messageIdGenerator.generate();
+    const uint16_t message_id = message_id_generator.generate();
 
     auto packet = build_packet(Packet::UNSUBSCRIBE, 0b0010, 2 + 2 + topic_size);
     packet.write_u16(message_id);
@@ -418,17 +214,6 @@ bool Client::unsubscribe(const String & topic) {
         }
     });
 
-    return client.connected();
-}
-
-void Client::disconnect() {
-    TRACE_FUNCTION
-    send_simple_packet(Packet::DISCONNECT);
-    client.stop();
-}
-
-bool Client::connected() {
-    TRACE_FUNCTION
     return client.connected();
 }
 

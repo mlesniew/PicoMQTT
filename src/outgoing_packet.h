@@ -3,10 +3,12 @@
 // #define MQTT_OUTGOING_PACKET_DEBUG
 
 #include <Arduino.h>
-#include "Print.h"
 
 #include "packet.h"
 #include "buffer.h"
+
+class Print;
+class Client;
 
 namespace NanoMQTT {
 
@@ -27,6 +29,10 @@ class OutgoingPacket: public Packet, public Print {
         size_t write_u8(uint8_t value);
         size_t write_u16(uint16_t value);
         size_t write_string(const char * string, uint16_t size);
+        size_t write_header();
+
+        size_t write_from_client(::Client & c, size_t length);
+        size_t write_zero(size_t count);
 
         void flush() override;
         virtual bool send();
@@ -36,7 +42,6 @@ class OutgoingPacket: public Packet, public Print {
 
         size_t write(const void * data, size_t length, void * (*memcpy_fn)(void *, const void *, size_t n));
         size_t write_packet_length(size_t length);
-        size_t write_header(uint8_t type, uint8_t flags = 0, size_t size = 0);
 
         Print & print;
         Buffer & buffer;

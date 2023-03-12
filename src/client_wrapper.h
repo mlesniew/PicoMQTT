@@ -6,7 +6,8 @@ namespace NanoMQTT {
 
 class ClientWrapper: public ::Client {
     public:
-        ClientWrapper(::Client & client, unsigned long read_timeout_millis);
+        ClientWrapper(::Client & client, unsigned long socket_timeout_seconds);
+        ClientWrapper(const ClientWrapper &) = default;
 
         virtual int available() override;
         virtual int connect(IPAddress ip, uint16_t port) override;
@@ -21,13 +22,16 @@ class ClientWrapper: public ::Client {
         virtual void flush() override;
         virtual void stop() override;
 
+        unsigned long get_millis_since_last_read() const;
         unsigned long get_millis_since_last_write() const;
-        const unsigned long read_timeout_millis;
+
+        const unsigned long socket_timeout_millis;
 
     protected:
         int available_wait(unsigned long timeout);
 
         ::Client & client;
+        unsigned long last_read;
         unsigned long last_write;
 };
 

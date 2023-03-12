@@ -41,7 +41,7 @@ const char * Buffer::read_string(Stream & stream, size_t size) {
     if (alloc.size == 0) {
         return "";
     }
-    stream.read(alloc.buffer, size);
+    stream.read(alloc.buffer, alloc.size - 1);
     alloc.buffer[alloc.size - 1] = '\0';
     return alloc.buffer;
 }

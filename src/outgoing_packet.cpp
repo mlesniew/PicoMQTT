@@ -1,3 +1,6 @@
+#include <Client.h>
+#include <Print.h>
+
 #include "outgoing_packet.h"
 #include "mqtt_debug.h"
 
@@ -7,9 +10,6 @@ OutgoingPacket::OutgoingPacket(Print & print, Buffer & buffer, Packet::Type type
     : Packet(type, flags, payload_size), print(print), buffer(buffer), state(State::ok) {
     TRACE_FUNCTION
     buffer.reset();
-    write_header(type, flags, payload_size);
-    // We've just sent the header.  This increased pos, let's move it back to zero.
-    pos = 0;
 }
 
 OutgoingPacket::OutgoingPacket(OutgoingPacket && other)
@@ -37,6 +37,37 @@ OutgoingPacket::~OutgoingPacket() {
             break;
     }
 #endif
+}
+
+size_t OutgoingPacket::write_from_client(::Client & client, size_t length) {
+    TRACE_FUNCTION
+
+    size_t written = 0;
+
+    while (written < length) {
+        const auto alloc = buffer.allocate(length - written);
+
+        if (!client.read((uint8_t *) alloc.buffer, alloc.size)) {
+            break;
+        }
+
+        pos += alloc.size;
+        written += alloc.size;
+
+        if (!buffer.get_remaining_size()) {
+            flush();
+        }
+    }
+
+    return written;
+}
+
+size_t OutgoingPacket::write_zero(size_t length) {
+    TRACE_FUNCTION
+    for (size_t written = 0; written < length; ++written) {
+        write_u8(0);
+    }
+    return length;
 }
 
 size_t OutgoingPacket::write(const void * data, size_t length, void * (*memcpy_fn)(void *, const void *, size_t n)) {
@@ -95,9 +126,12 @@ size_t OutgoingPacket::write_packet_length(size_t length) {
     return ret;
 }
 
-size_t OutgoingPacket::write_header(uint8_t packet_type, uint8_t flags, size_t length) {
+size_t OutgoingPacket::write_header() {
     TRACE_FUNCTION
-    return write_u8(packet_type | flags) + write_packet_length(length);
+    const size_t ret = write_u8(head) + write_packet_length(size);
+    // we've just written the header, payload starts now
+    pos = 0;
+    return ret;
 }
 
 void OutgoingPacket::flush() {
@@ -108,6 +142,7 @@ void OutgoingPacket::flush() {
         const size_t w = print.write((const uint8_t *)(alloc.buffer + written), alloc.size - written);
         if (!w) {
             state = State::error;
+            break;
         }
         written += w;
     }
