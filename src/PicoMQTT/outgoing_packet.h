@@ -10,7 +10,7 @@
 class Print;
 class Client;
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class OutgoingPacket: public Packet, public Print {
     public:

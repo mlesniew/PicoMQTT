@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class PrintMux: public ::Print {
     public:

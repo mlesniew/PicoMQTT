@@ -5,7 +5,7 @@
 #include "Print.h"
 #include "Stream.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class Buffer: public Print {
     public:

@@ -1,8 +1,7 @@
-#include "incoming_packet.h"
-#include "nanomqtt.h"
-#include "mqtt_debug.h"
+#include "client.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 Client::Client(::Client & client, size_t buffer_size, unsigned long keep_alive_seconds,
                unsigned long socket_timeout_seconds)

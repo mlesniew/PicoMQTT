@@ -2,9 +2,9 @@
 #include <Print.h>
 
 #include "outgoing_packet.h"
-#include "mqtt_debug.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 OutgoingPacket::OutgoingPacket(Print & print, Buffer & buffer, Packet::Type type, uint8_t flags, size_t payload_size)
     : Packet(type, flags, payload_size), print(print), buffer(buffer), state(State::ok) {

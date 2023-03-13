@@ -1,7 +1,7 @@
-#include "mqtt_publisher.h"
-#include "mqtt_debug.h"
+#include "publisher.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
                             uint8_t flags, size_t total_size,

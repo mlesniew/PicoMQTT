@@ -5,12 +5,12 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 
-#include "mqtt_connection.h"
-#include "mqtt_publisher.h"
-#include "mqtt_subscriber.h"
+#include "connection.h"
+#include "publisher.h"
+#include "subscriber.h"
 
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class Server: public Publisher {
     public:

@@ -2,9 +2,9 @@
 
 #include "client_wrapper.h"
 
-#include "mqtt_debug.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 ClientWrapper::ClientWrapper(::Client & client, unsigned long socket_timeout_seconds):
     socket_timeout_millis(socket_timeout_seconds * 1000), client(client), last_read(0), last_write(0) {

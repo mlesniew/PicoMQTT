@@ -2,12 +2,12 @@
 
 #include <Arduino.h>
 
-#include "mqtt_connection.h"
-#include "mqtt_publisher.h"
+#include "connection.h"
+#include "publisher.h"
 #include "incoming_packet.h"
 #include "outgoing_packet.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class Client: public Connection, public Publisher {
     public:

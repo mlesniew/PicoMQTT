@@ -1,20 +1,13 @@
 #pragma once
 
-#include <Arduino.h>
-#include "Client.h"
+#include <Client.h>
 
-#include "packet.h"
+namespace PicoMQTT {
 
-namespace NanoMQTT {
-
-class IncomingPacket: public Packet, public Client {
+class ClientWrapper: public ::Client {
     public:
-        IncomingPacket(Client & client);
-
-        IncomingPacket(const IncomingPacket &) = delete;
-        const IncomingPacket & operator=(const IncomingPacket &) = delete;
-
-        ~IncomingPacket();
+        ClientWrapper(::Client & client, unsigned long socket_timeout_seconds);
+        ClientWrapper(const ClientWrapper &) = default;
 
         virtual int available() override;
         virtual int connect(IPAddress ip, uint16_t port) override;
@@ -29,13 +22,17 @@ class IncomingPacket: public Packet, public Client {
         virtual void flush() override;
         virtual void stop() override;
 
-        uint8_t read_u8();
-        uint16_t read_u16();
+        unsigned long get_millis_since_last_read() const;
+        unsigned long get_millis_since_last_write() const;
+
+        const unsigned long socket_timeout_millis;
 
     protected:
-        static Packet read_header(Client & client);
+        int available_wait(unsigned long timeout);
 
-        Client & client;
+        ::Client & client;
+        unsigned long last_read;
+        unsigned long last_write;
 };
 
 }

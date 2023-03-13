@@ -1,7 +1,7 @@
-#include "mqtt_connection.h"
-#include "mqtt_debug.h"
+#include "connection.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 Connection::Connection(
     ::Client & client, Buffer & buffer,

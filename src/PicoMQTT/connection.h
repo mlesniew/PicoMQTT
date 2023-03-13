@@ -10,7 +10,7 @@
 #include "incoming_packet.h"
 #include "outgoing_packet.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class Connection {
     public:

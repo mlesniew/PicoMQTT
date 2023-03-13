@@ -1,7 +1,7 @@
-#include "mqtt_subscriber.h"
-#include "mqtt_debug.h"
+#include "subscriber.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 bool Subscriber::topic_matches(const char * p, const char * t) {
     TRACE_FUNCTION

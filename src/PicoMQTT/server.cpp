@@ -1,7 +1,7 @@
-#include "mqtt_server.h"
-#include "mqtt_debug.h"
+#include "server.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 Server::Client::Client(const Server::Client & other)
     : Connection(wifi_client, other.buffer, 0),

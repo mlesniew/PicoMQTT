@@ -1,7 +1,7 @@
 #include "buffer.h"
-#include "mqtt_debug.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 Buffer::Buffer(const size_t size): size(size), pos(0), overflow(false), buffer(new char[size]) {
     TRACE_FUNCTION

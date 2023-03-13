@@ -4,7 +4,7 @@
 
 #include <Arduino.h>
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class Subscriber {
     public:

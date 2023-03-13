@@ -1,7 +1,7 @@
 #include "incoming_packet.h"
-#include "mqtt_debug.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 IncomingPacket::IncomingPacket(Client & client)
     : Packet(read_header(client)), client(client) {

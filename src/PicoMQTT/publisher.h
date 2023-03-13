@@ -5,7 +5,7 @@
 #include "outgoing_packet.h"
 #include "print_mux.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 class Publisher {
     public:

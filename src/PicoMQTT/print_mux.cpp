@@ -1,7 +1,7 @@
 #include "print_mux.h"
-#include "mqtt_debug.h"
+#include "debug.h"
 
-namespace NanoMQTT {
+namespace PicoMQTT {
 
 size_t PrintMux::write(uint8_t value) {
     TRACE_FUNCTION
