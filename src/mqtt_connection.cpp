@@ -79,6 +79,13 @@ void Connection::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
 }
 
+void Connection::send_ack(Packet::Type ack_type, uint16_t msg_id) {
+    TRACE_FUNCTION
+    auto ack = build_packet(ack_type, 0, 2);
+    ack.write_u16(msg_id);
+    ack.send();
+}
+
 void Connection::handle_packet(IncomingPacket & packet) {
     TRACE_FUNCTION
 
@@ -92,8 +99,7 @@ void Connection::handle_packet(IncomingPacket & packet) {
             const uint8_t qos = (packet.get_flags() >> 1) & 0b11;
             // const bool retain = packet.get_flags() & 0b1;
 
-            const bool ack_needed = (qos == 1);
-            const uint16_t msg_id = ack_needed ? packet.read_u16() : 0;
+            const uint16_t msg_id = qos ? packet.read_u16() : 0;
 
             if (buffer.is_overflown()) {
                 on_message_too_big(packet);
@@ -101,21 +107,31 @@ void Connection::handle_packet(IncomingPacket & packet) {
                 on_message(topic, packet);
             }
 
-            if (ack_needed) {
-                auto packet = build_packet(Packet::PUBACK, 0, 2);
-                packet.write_u16(msg_id);
-                packet.send();
+            if (qos) {
+                send_ack(qos == 1 ? Packet::PUBACK : Packet::PUBREC, msg_id);
             }
+            break;
         };
-        return;
+
+        case Packet::PUBREC:
+            send_ack(Packet::PUBREL, packet.read_u16());
+            break;
+
+        case Packet::PUBREL:
+            send_ack(Packet::PUBCOMP, packet.read_u16());
+            break;
+
+        case Packet::PUBCOMP:
+            // ignore
+            break;
 
         case Packet::DISCONNECT:
             on_disconnect();
-            return;
+            break;
 
         default:
             on_protocol_violation();
-            return;
+            break;
     }
 }
 

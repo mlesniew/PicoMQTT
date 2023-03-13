@@ -52,7 +52,6 @@ class Connection {
                 uint16_t value;
         } message_id_generator;
 
-
         OutgoingPacket build_packet(Packet::Type type, uint8_t flags = 0, size_t length = 0);
 
         void wait_for_reply(Packet::Type type, std::function<void(IncomingPacket & packet)> handler);
@@ -69,6 +68,9 @@ class Connection {
         uint16_t keep_alive_millis;
 
         virtual void handle_packet(IncomingPacket & packet);
+
+    private:
+        void send_ack(Packet::Type ack_type, uint16_t msg_id);
 };
 
 }
