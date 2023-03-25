@@ -44,6 +44,11 @@ Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffe
     TRACE_FUNCTION
 }
 
+Publisher::Publish::~Publish() {
+    TRACE_FUNCTION
+    while ((pos < size) && write(0));
+}
+
 bool Publisher::Publish::send() {
     TRACE_FUNCTION
     return OutgoingPacket::send() && publisher.on_publish_complete(*this);

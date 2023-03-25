@@ -1,8 +1,9 @@
 #include <Client.h>
 #include <Print.h>
 
-#include "outgoing_packet.h"
+#include "buffer.h"
 #include "debug.h"
+#include "outgoing_packet.h"
 
 namespace PicoMQTT {
 
@@ -47,7 +48,7 @@ size_t OutgoingPacket::write_from_client(::Client & client, size_t length) {
     while (written < length) {
         const auto alloc = buffer.allocate(length - written);
 
-        if (!client.read((uint8_t *) alloc.buffer, alloc.size)) {
+        if (client.read((uint8_t *) alloc.buffer, alloc.size) <= 0) {
             break;
         }
 

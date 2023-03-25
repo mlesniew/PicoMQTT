@@ -5,7 +5,8 @@ namespace PicoMQTT {
 
 Client::Client(::Client & client, size_t buffer_size, unsigned long keep_alive_seconds,
                unsigned long socket_timeout_seconds)
-    : Connection(client, buffer_instance, keep_alive_seconds, socket_timeout_seconds), buffer_instance(buffer_size) {
+    : Connection(client, buffer_instance, keep_alive_seconds, socket_timeout_seconds),
+      buffer_instance(buffer_size) {
     TRACE_FUNCTION
 }
 
@@ -107,18 +108,9 @@ bool Client::connect(
     return client.connected();
 }
 
-void Client::on_message(const char * topic, const char * payload, size_t payload_size) {
-    TRACE_FUNCTION
-}
-
 void Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
-    const auto payload = buffer.read(packet, packet.get_remaining_size());
-    if (buffer.is_overflown()) {
-        on_message_too_big(packet);
-    } else {
-        on_message(topic, payload.buffer, payload.size);
-    }
+    MessageListener::on_message(topic, packet);
 }
 
 void Client::loop() {

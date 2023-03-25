@@ -5,14 +5,16 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 
+#include "debug.h"
+#include "incoming_packet.h"
 #include "connection.h"
 #include "publisher.h"
 #include "subscriber.h"
-
+#include "message_listener.h"
 
 namespace PicoMQTT {
 
-class Server: public Publisher {
+class Server: public Publisher, public Subscriber, public MessageListener {
     public:
         class Client: public Connection, public Subscriber {
             public:
@@ -38,8 +40,21 @@ class Server: public Publisher {
                 virtual void handle_packet(IncomingPacket & packet) override;
         };
 
-        Server(uint16_t port = 1883, size_t buffer_size = 1024, unsigned long keep_alive_tolerance_seconds = 10,
-               unsigned long socket_timeout_seconds = 5);
+        class IncomingPublish: public IncomingPacket {
+            public:
+                IncomingPublish(IncomingPacket & packet, Publish & publish);
+                IncomingPublish(const IncomingPublish &) = delete;
+                ~IncomingPublish();
+
+                virtual int read(uint8_t * buf, size_t size) override;
+                virtual int read() override;
+
+            protected:
+                Publish & publish;
+        };
+
+        Server(uint16_t port = 1883, size_t client_buffer_size = 128,
+               unsigned long keep_alive_tolerance_seconds = 10, unsigned long socket_timeout_seconds = 5);
 
         void loop();
 
@@ -68,7 +83,6 @@ class Server: public Publisher {
 
         const unsigned long keep_alive_tolerance_seconds;
         const unsigned long socket_timeout_seconds;
-
 };
 
 }

@@ -56,8 +56,8 @@ Server::Client::Client(Server & server, const WiFiClient & p_client)
         }
 
         if (has_will) {
-            /* const char * will_topic = */ buffer.read_string(packet, packet.read_u16());
-            /* const char * will_payload = */ buffer.read_string(packet, packet.read_u16());
+            packet.ignore(packet.read_u16()); // will topic
+            packet.ignore(packet.read_u16()); // will payload
         }
 
         const char * user = has_user ? buffer.read_string(packet, packet.read_u16()) : nullptr;
@@ -74,17 +74,15 @@ Server::Client::Client(Server & server, const WiFiClient & p_client)
 
 void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
+
     const size_t payload_size = packet.get_remaining_size();
-    // Topic is allocated in the same buffer as the one we're going to use for the outgoing packet, let's allocate
-    // a temporary variable to hold a copy of the topic.
-    const String topic_string = topic;
+    auto publish = server.publish(topic, payload_size);
 
-    auto publish = server.publish(topic_string.c_str(), payload_size);
-
-    const size_t written = publish.write_from_client(packet, payload_size);
-
-    // in case client reads failed, fill the packet with zeros to not cause a protocol violation
-    publish.write_zero(payload_size - written);
+    // Always notify the server about the message
+    {
+        IncomingPublish incoming_publish(packet, publish);
+        server.on_message(topic, incoming_publish);
+    }
 
     publish.send();
 }
@@ -185,10 +183,38 @@ void Server::Client::loop() {
     Connection::loop();
 }
 
+Server::IncomingPublish::IncomingPublish(IncomingPacket & packet, Publish & publish)
+    : IncomingPacket(std::move(packet)), publish(publish) {
+    TRACE_FUNCTION
+}
 
-Server::Server(uint16_t port, size_t buffer_size, unsigned long keep_alive_tolerance_seconds,
+Server::IncomingPublish::~IncomingPublish() {
+    TRACE_FUNCTION
+    pos += publish.write_from_client(client, get_remaining_size());
+}
+
+int Server::IncomingPublish::read(uint8_t * buf, size_t size) {
+    TRACE_FUNCTION
+    const int ret = IncomingPacket::read(buf, size);
+    if (ret > 0) {
+        publish.write(buf, ret);
+    }
+    return ret;
+}
+
+int Server::IncomingPublish::read() {
+    TRACE_FUNCTION
+    const int ret = IncomingPacket::read();
+    if (ret >= 0) {
+        publish.write(ret);
+    }
+    return ret;
+}
+
+Server::Server(uint16_t port, size_t client_buffer_size,
+               unsigned long keep_alive_tolerance_seconds,
                unsigned long socket_timeout_seconds)
-    : server(port), buffer(buffer_size), keep_alive_tolerance_seconds(keep_alive_tolerance_seconds),
+    : server(port), buffer(client_buffer_size), keep_alive_tolerance_seconds(keep_alive_tolerance_seconds),
       socket_timeout_seconds(socket_timeout_seconds) {
     TRACE_FUNCTION
 }

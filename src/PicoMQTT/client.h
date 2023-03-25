@@ -6,10 +6,11 @@
 #include "publisher.h"
 #include "incoming_packet.h"
 #include "outgoing_packet.h"
+#include "message_listener.h"
 
 namespace PicoMQTT {
 
-class Client: public Connection, public Publisher {
+class Client: public Connection, public Publisher, public MessageListener {
     public:
 
         Client(::Client & client, size_t buffer_size = 512, unsigned long keep_alive_seconds = 60,

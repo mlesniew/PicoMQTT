@@ -1,0 +1,9 @@
+#pragma once
+
+#ifndef PICOMQTT_MAX_TOPIC_SIZE
+#define PICOMQTT_MAX_TOPIC_SIZE 128
+#endif
+
+#ifndef PICOMQTT_MAX_MESSAGE_SIZE
+#define PICOMQTT_MAX_MESSAGE_SIZE 1024
+#endif

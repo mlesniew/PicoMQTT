@@ -37,7 +37,7 @@ class Packet {
         uint8_t get_flags() const { return head & 0x0f; }
 
         bool is_valid() { return get_type() != ERROR; }
-        size_t get_remaining_size() const { return size - pos; }
+        size_t get_remaining_size() const { return pos < size ? size - pos : 0; }
 
         const uint8_t head;
         const size_t size;

@@ -1,3 +1,4 @@
+#include "config.h"
 #include "connection.h"
 #include "debug.h"
 
@@ -71,11 +72,11 @@ void Connection::wait_for_reply(Packet::Type type, std::function<void(IncomingPa
     }
 }
 
-void Connection::on_message_too_big(IncomingPacket & packet) {
+void Connection::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
 }
 
-void Connection::on_message(const char * topic, IncomingPacket & packet) {
+void Connection::on_topic_too_long(const IncomingPacket & packet) {
     TRACE_FUNCTION
 }
 
@@ -91,25 +92,36 @@ void Connection::handle_packet(IncomingPacket & packet) {
 
     switch (packet.get_type()) {
         case Packet::PUBLISH: {
-            buffer.reset();
-
-            const char * topic = buffer.read_string(packet, packet.read_u16());
+            const uint16_t topic_size = packet.read_u16();
 
             // const bool dup = (packet.get_flags() >> 3) & 0b1;
             const uint8_t qos = (packet.get_flags() >> 1) & 0b11;
             // const bool retain = packet.get_flags() & 0b1;
 
-            const uint16_t msg_id = qos ? packet.read_u16() : 0;
+            uint16_t msg_id = 0;
 
-            if (buffer.is_overflown()) {
-                on_message_too_big(packet);
+            if (topic_size > PICOMQTT_MAX_TOPIC_SIZE) {
+                packet.ignore(topic_size);
+                on_topic_too_long(packet);
+                if (qos) {
+                    msg_id = packet.read_u16();
+                }
             } else {
+                char topic[topic_size + 1];
+                if (!packet.read_string(topic, topic_size)) {
+                    // connection error
+                    return;
+                }
+                if (qos) {
+                    msg_id = packet.read_u16();
+                }
                 on_message(topic, packet);
             }
 
-            if (qos) {
+            if (msg_id) {
                 send_ack(qos == 1 ? Packet::PUBACK : Packet::PUBREC, msg_id);
             }
+
             break;
         };
 

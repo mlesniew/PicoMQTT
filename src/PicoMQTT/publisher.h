@@ -25,6 +25,8 @@ class Publisher {
                         const char * topic, size_t payload_size,
                         uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0);
 
+                ~Publish();
+
                 virtual bool send() override;
 
                 const uint8_t qos;

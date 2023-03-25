@@ -10,6 +10,7 @@ namespace PicoMQTT {
 class IncomingPacket: public Packet, public Client {
     public:
         IncomingPacket(Client & client);
+        IncomingPacket(IncomingPacket &&);
 
         IncomingPacket(const IncomingPacket &) = delete;
         const IncomingPacket & operator=(const IncomingPacket &) = delete;
@@ -31,6 +32,8 @@ class IncomingPacket: public Packet, public Client {
 
         uint8_t read_u8();
         uint16_t read_u16();
+        bool read_string(char * buffer, size_t len);
+        void ignore(size_t len);
 
     protected:
         static Packet read_header(Client & client);

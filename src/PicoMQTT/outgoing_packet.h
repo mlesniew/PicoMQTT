@@ -5,12 +5,13 @@
 #include <Arduino.h>
 
 #include "packet.h"
-#include "buffer.h"
 
 class Print;
 class Client;
 
 namespace PicoMQTT {
+
+class Buffer;
 
 class OutgoingPacket: public Packet, public Print {
     public:

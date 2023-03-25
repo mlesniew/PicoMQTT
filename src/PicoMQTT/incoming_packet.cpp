@@ -8,6 +8,12 @@ IncomingPacket::IncomingPacket(Client & client)
     TRACE_FUNCTION
 }
 
+IncomingPacket::IncomingPacket(IncomingPacket && other)
+    : Packet(other), client(other.client) {
+    TRACE_FUNCTION
+    other.pos = size;
+}
+
 IncomingPacket::~IncomingPacket() {
     TRACE_FUNCTION
 #ifdef MQTT_DEBUG
@@ -119,6 +125,20 @@ uint8_t IncomingPacket::read_u8() {
 uint16_t IncomingPacket::read_u16() {
     TRACE_FUNCTION;
     return ((uint16_t) read_u8()) << 8 | ((uint16_t) read_u8());
+}
+
+bool IncomingPacket::read_string(char * buffer, size_t len) {
+    if (read((uint8_t *) buffer, len) != (int) len) {
+        return false;
+    }
+    buffer[len] = '\0';
+    return true;
+}
+
+void IncomingPacket::ignore(size_t len) {
+    while (len--) {
+        read();
+    }
 }
 
 Packet IncomingPacket::read_header(Client & client) {

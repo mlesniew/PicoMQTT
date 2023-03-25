@@ -26,8 +26,8 @@ class Connection {
             CRC_UNDEFINED = 255,
         };
 
-        Connection(::Client & client, Buffer & buffer,
-                   unsigned long keep_alive_seconds = 0, unsigned long socket_timeout_seconds = 15);
+        Connection(::Client & client, Buffer & buffer, unsigned long keep_alive_seconds = 0,
+                   unsigned long socket_timeout_seconds = 15);
         Connection(const Connection &) = default;
 
         virtual ~Connection() {}
@@ -56,7 +56,7 @@ class Connection {
 
         void wait_for_reply(Packet::Type type, std::function<void(IncomingPacket & packet)> handler);
 
-        virtual void on_message_too_big(IncomingPacket & packet);
+        virtual void on_topic_too_long(const IncomingPacket & packet);
         virtual void on_message(const char * topic, IncomingPacket & packet);
 
         virtual void on_timeout();
