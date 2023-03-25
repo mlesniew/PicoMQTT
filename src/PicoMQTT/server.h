@@ -30,7 +30,6 @@ class Server: public Publisher, public Subscriber, public MessageListener {
 
             protected:
                 Server & server;
-                WiFiClient wifi_client;
 
                 String client_id;
 
@@ -53,8 +52,7 @@ class Server: public Publisher, public Subscriber, public MessageListener {
                 Publish & publish;
         };
 
-        Server(uint16_t port = 1883, size_t client_buffer_size = 128,
-               unsigned long keep_alive_tolerance_seconds = 10, unsigned long socket_timeout_seconds = 5);
+        Server(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10, unsigned long socket_timeout_seconds = 5);
 
         void loop();
 
@@ -78,7 +76,6 @@ class Server: public Publisher, public Subscriber, public MessageListener {
         virtual PrintMux get_subscribed(const char * topic);
 
         WiFiServer server;
-        Buffer buffer;
         std::list<Client> clients;
 
         const unsigned long keep_alive_tolerance_seconds;

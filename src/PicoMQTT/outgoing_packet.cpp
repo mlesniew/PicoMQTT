@@ -1,16 +1,18 @@
 #include <Client.h>
 #include <Print.h>
 
-#include "buffer.h"
 #include "debug.h"
 #include "outgoing_packet.h"
 
 namespace PicoMQTT {
 
-OutgoingPacket::OutgoingPacket(Print & print, Buffer & buffer, Packet::Type type, uint8_t flags, size_t payload_size)
-    : Packet(type, flags, payload_size), print(print), buffer(buffer), state(State::ok) {
+OutgoingPacket::OutgoingPacket(Print & print, Packet::Type type, uint8_t flags, size_t payload_size)
+    : Packet(type, flags, payload_size), print(print),
+#ifndef PICOMQTT_UNBUFFERED
+      buffer_position(0),
+#endif
+      state(State::ok)  {
     TRACE_FUNCTION
-    buffer.reset();
 }
 
 OutgoingPacket::OutgoingPacket(OutgoingPacket && other)
@@ -21,7 +23,12 @@ OutgoingPacket::OutgoingPacket(OutgoingPacket && other)
 
 OutgoingPacket::~OutgoingPacket() {
     TRACE_FUNCTION
-#ifdef MQTT_DEBUG
+#ifdef PICOMQTT_DEBUG
+#ifndef PICOMQTT_UNBUFFERED
+    if (buffer_position) {
+        Serial.printf("OutgoingPacket has unsent data in the buffer (pos=%u)\n", buffer_position);
+    }
+#endif
     switch (state) {
         case State::ok:
             Serial.println(F("Unsent OutgoingPacket"));
@@ -42,63 +49,113 @@ OutgoingPacket::~OutgoingPacket() {
 
 size_t OutgoingPacket::write_from_client(::Client & client, size_t length) {
     TRACE_FUNCTION
-
     size_t written = 0;
-
+#ifndef PICOMQTT_UNBUFFERED
     while (written < length) {
-        const auto alloc = buffer.allocate(length - written);
+        const size_t remaining = length - written;
+        const size_t remaining_buffer_space = PICOMQTT_OUTGOING_BUFFER_SIZE - buffer_position;
+        const size_t chunk_size = remaining < remaining_buffer_space ? remaining : remaining_buffer_space;
 
-        if (client.read((uint8_t *) alloc.buffer, alloc.size) <= 0) {
+        const int read_size = client.read(buffer + buffer_position, chunk_size);
+        if (read_size <= 0) {
             break;
         }
 
-        pos += alloc.size;
-        written += alloc.size;
+        buffer_position += (size_t) read_size;
+        written += (size_t) read_size;
 
-        if (!buffer.get_remaining_size()) {
+        if (buffer_position >= PICOMQTT_OUTGOING_BUFFER_SIZE) {
             flush();
         }
     }
-
+#else
+    uint8_t buffer[128] __attribute__((aligned(4)));
+    while (written < length) {
+        const size_t remain = length - written;
+        const size_t chunk_size = sizeof(buffer) < remain ? sizeof(buffer) : remain;
+        const int read_size = client.read(buffer, chunk_size);
+        if (read_size <= 0) {
+            break;
+        }
+        const size_t write_size = print.write(buffer, read_size);
+        written += write_size;
+        if (!write_size) {
+            break;
+        }
+    }
+#endif
+    pos += written;
     return written;
 }
 
 size_t OutgoingPacket::write_zero(size_t length) {
     TRACE_FUNCTION
     for (size_t written = 0; written < length; ++written) {
-        write_u8(0);
+        write_u8('0');
     }
     return length;
 }
 
-size_t OutgoingPacket::write(const void * data, size_t length, void * (*memcpy_fn)(void *, const void *, size_t n)) {
+#ifndef PICOMQTT_UNBUFFERED
+size_t OutgoingPacket::write(const void * data, size_t remaining, void * (*memcpy_fn)(void *, const void *, size_t n)) {
     TRACE_FUNCTION
 
     const char * src = (const char *) data;
-    while ((state == State::ok) && length) {
 
-        const auto alloc = buffer.allocate(length);
+    while (remaining) {
+        const size_t remaining_buffer_space = PICOMQTT_OUTGOING_BUFFER_SIZE - buffer_position;
+        const size_t chunk_size = remaining < remaining_buffer_space ? remaining : remaining_buffer_space;
 
-        memcpy_fn(alloc.buffer, src, alloc.size);
-        src += alloc.size;
-        length -= alloc.size;
-        pos += alloc.size;
+        memcpy_fn(buffer + buffer_position, src, chunk_size);
 
-        if (!buffer.get_remaining_size()) {
+        buffer_position += chunk_size;
+        src += chunk_size;
+        remaining -= chunk_size;
+
+        if (buffer_position >= PICOMQTT_OUTGOING_BUFFER_SIZE) {
             flush();
         }
     }
-    return src - (const char *) data;
-}
 
-size_t OutgoingPacket::write(const void * data, size_t length) {
+    const size_t written = src - (const char *) data;
+    pos += written;
+    return written;
+}
+#endif
+
+size_t OutgoingPacket::write(const uint8_t * data, size_t length) {
     TRACE_FUNCTION
+#ifndef PICOMQTT_UNBUFFERED
     return write(data, length, memcpy);
+#else
+    const size_t written = print.write(data, length);
+    pos += written;
+    return written;
+#endif
 }
 
-size_t OutgoingPacket::write_P(const void * data, size_t length) {
+size_t OutgoingPacket::write_P(PGM_P data, size_t length) {
     TRACE_FUNCTION
+#ifndef PICOMQTT_UNBUFFERED
     return write(data, length, memcpy_P);
+#else
+    // here we will need a buffer
+    uint8_t buffer[128] __attribute__((aligned(4)));
+    size_t written = 0;
+    while (written < length) {
+        const size_t remain = length - written;
+        const size_t chunk_size = sizeof(buffer) < remain ? sizeof(buffer) : remain;
+        memcpy_P(buffer, data, chunk_size);
+        const size_t write_size = print.write(buffer, chunk_size);
+        written += write_size;
+        data += write_size;
+        if (!write_size) {
+            break;
+        }
+    }
+    pos += written;
+    return written;
+#endif
 }
 
 size_t OutgoingPacket::write_u8(uint8_t c) {
@@ -113,7 +170,7 @@ size_t OutgoingPacket::write_u16(uint16_t value) {
 
 size_t OutgoingPacket::write_string(const char * string, uint16_t size) {
     TRACE_FUNCTION
-    return write_u16(size) + write(string, size);
+    return write_u16(size) + write((const uint8_t *) string, size);
 }
 
 size_t OutgoingPacket::write_packet_length(size_t length) {
@@ -137,25 +194,25 @@ size_t OutgoingPacket::write_header() {
 
 void OutgoingPacket::flush() {
     TRACE_FUNCTION
-    const auto alloc = buffer.get_content();
-    size_t written = 0;
-    while ((state == State::ok) && (written < alloc.size)) {
-        const size_t w = print.write((const uint8_t *)(alloc.buffer + written), alloc.size - written);
-        if (!w) {
-            state = State::error;
-            break;
-        }
-        written += w;
-    }
-    buffer.reset();
+#ifndef PICOMQTT_UNBUFFERED
+    print.write(buffer, buffer_position);
+    buffer_position = 0;
+#endif
 }
 
 bool OutgoingPacket::send() {
     TRACE_FUNCTION
+    const size_t remaining_size = get_remaining_size();
+    if (remaining_size) {
+#ifdef PICOMQTT_DEBUG
+        Serial.printf("OutgoingPacket sent called on incomplete payload (%u / %u), filling with zeros.\n", pos, size);
+#endif
+        write_zero(remaining_size);
+    }
     flush();
     switch (state) {
         case State::ok:
-            print.flush();
+            // print.flush();
             state = State::sent;
         case State::sent:
             return true;

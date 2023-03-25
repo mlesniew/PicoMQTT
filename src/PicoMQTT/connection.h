@@ -5,7 +5,6 @@
 #include <Arduino.h>
 #include "Client.h"
 
-#include "buffer.h"
 #include "client_wrapper.h"
 #include "incoming_packet.h"
 #include "outgoing_packet.h"
@@ -26,7 +25,7 @@ class Connection {
             CRC_UNDEFINED = 255,
         };
 
-        Connection(::Client & client, Buffer & buffer, unsigned long keep_alive_seconds = 0,
+        Connection(const ::WiFiClient & client, unsigned long keep_alive_seconds = 0,
                    unsigned long socket_timeout_seconds = 15);
         Connection(const Connection &) = default;
 
@@ -64,12 +63,17 @@ class Connection {
         virtual void on_disconnect();
 
         ClientWrapper client;
-        Buffer & buffer;
         uint16_t keep_alive_millis;
 
         virtual void handle_packet(IncomingPacket & packet);
 
+    protected:
+        unsigned long get_millis_since_last_read() const;
+        unsigned long get_millis_since_last_write() const;
+
     private:
+        unsigned long last_read;
+        unsigned long last_write;
         void send_ack(Packet::Type ack_type, uint16_t msg_id);
 };
 

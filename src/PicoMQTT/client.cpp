@@ -3,10 +3,8 @@
 
 namespace PicoMQTT {
 
-Client::Client(::Client & client, size_t buffer_size, unsigned long keep_alive_seconds,
-               unsigned long socket_timeout_seconds)
-    : Connection(client, buffer_instance, keep_alive_seconds, socket_timeout_seconds),
-      buffer_instance(buffer_size) {
+Client::Client(const ::WiFiClient & client, unsigned long keep_alive_seconds, unsigned long socket_timeout_seconds)
+    : Connection(client, keep_alive_seconds, socket_timeout_seconds) {
     TRACE_FUNCTION
 }
 
@@ -116,7 +114,7 @@ void Client::on_message(const char * topic, IncomingPacket & packet) {
 void Client::loop() {
     TRACE_FUNCTION
 
-    if (client.connected() && client.get_millis_since_last_write() >= keep_alive_millis) {
+    if (client.connected() && get_millis_since_last_write() >= keep_alive_millis) {
         // ping time!
         build_packet(Packet::PINGREQ).send();
         wait_for_reply(Packet::PINGRESP, [](IncomingPacket &) {});
@@ -129,7 +127,7 @@ Publisher::Publish Client::publish(const char * topic, const size_t payload_size
                                    uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION
     return Publish(
-               *this, client, buffer,
+               *this, client,
                topic, payload_size,
                (qos >= 1) ? 1 : 0,
                retain,

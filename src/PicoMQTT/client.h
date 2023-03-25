@@ -13,8 +13,7 @@ namespace PicoMQTT {
 class Client: public Connection, public Publisher, public MessageListener {
     public:
 
-        Client(::Client & client, size_t buffer_size = 512, unsigned long keep_alive_seconds = 60,
-               unsigned long socket_timeout_seconds = 10);
+        Client(const ::WiFiClient & client, unsigned long keep_alive_seconds = 60, unsigned long socket_timeout_seconds = 10);
 
         bool connect(
             const char * host, uint16_t port,
@@ -35,8 +34,6 @@ class Client: public Connection, public Publisher, public MessageListener {
     protected:
         virtual void on_message(const char * topic, const char * payload, size_t payload_size);
         virtual void on_message(const char * topic, IncomingPacket & packet);
-
-        Buffer buffer_instance;
 
     private:
         virtual bool on_publish_complete(const Publish & publish) override;

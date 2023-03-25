@@ -1,29 +1,49 @@
-#include "server.h"
+#include "config.h"
 #include "debug.h"
+#include "server.h"
 
 namespace PicoMQTT {
 
 Server::Client::Client(const Server::Client & other)
-    : Connection(wifi_client, other.buffer, 0),
+    : Connection(other.client, 0),
       Subscriber(other),
-      server(other.server), wifi_client(other.wifi_client),
+      server(other.server),
       client_id(other.client_id) {
     TRACE_FUNCTION
 }
 
-Server::Client::Client(Server & server, const WiFiClient & p_client)
-    : Connection(wifi_client, server.buffer, 0, server.socket_timeout_seconds),
-      server(server), wifi_client(p_client),
-      client_id("<unknown>") {
+Server::Client::Client(Server & server, const WiFiClient & client)
+    : Connection(client, 0, server.socket_timeout_seconds), server(server), client_id("<unknown>") {
     TRACE_FUNCTION
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
         TRACE_FUNCTION
 
-        buffer.reset();
+        auto connack = [this](ConnectReturnCode crc) {
+            TRACE_FUNCTION
+            auto connack = build_packet(Packet::CONNACK, 0, 2);
+            connack.write_u8(0);  /* session present always set to zero */
+            connack.write_u8(crc);
+            connack.send();
+            if (crc != CRC_ACCEPTED) {
+                this->client.stop();
+            }
+        };
 
-        if (strcmp(buffer.read_string(packet, packet.read_u16()), "MQTT") != 0) {
-            on_protocol_violation();
-            return;
+        {
+            // MQTT protocol identifier
+            char buf[4];
+
+            if (packet.read_u16() != 4) {
+                on_protocol_violation();
+                return;
+            }
+
+            packet.read((uint8_t *) buf, 4);
+
+            if (memcmp(buf, "MQTT", 4) != 0) {
+                on_protocol_violation();
+                return;
+            }
         }
 
         const uint8_t protocol_level = packet.read_u8();
@@ -49,7 +69,18 @@ Server::Client::Client(Server & server, const WiFiClient & p_client)
 
         const uint16_t keep_alive_seconds = packet.read_u16();
         keep_alive_millis = keep_alive_seconds ? (keep_alive_seconds + this->server.keep_alive_tolerance_seconds) * 1000 : 0;
-        client_id = buffer.read_string(packet, packet.read_u16());
+
+        {
+            const size_t client_id_size = packet.read_u16();
+            if (client_id_size > PICOMQTT_MAX_CLIENT_ID_SIZE) {
+                connack(CRC_IDENTIFIER_REJECTED);
+                return;
+            }
+
+            char client_id_buffer[client_id_size + 1];
+            packet.read_string(client_id_buffer, client_id_size);
+            client_id = client_id_buffer;
+        }
 
         if (client_id.isEmpty()) {
             client_id = String((unsigned int)(this), HEX);
@@ -60,15 +91,35 @@ Server::Client::Client(Server & server, const WiFiClient & p_client)
             packet.ignore(packet.read_u16()); // will payload
         }
 
-        const char * user = has_user ? buffer.read_string(packet, packet.read_u16()) : nullptr;
-        const char * pass = has_pass ? buffer.read_string(packet, packet.read_u16()) : nullptr;
+        // read username
+        const size_t user_size = has_user ? packet.read_u16() : 0;
+        if (user_size > PICOMQTT_MAX_USERPASS_SIZE) {
+            connack(CRC_BAD_USERNAME_OR_PASSWORD);
+            return;
+        }
+        char user[user_size + 1];
+        if (!packet.read_string(user, user_size)) {
+            on_timeout();
+            return;
+        }
 
-        const uint8_t connect_return_code = this->server.auth(client_id.c_str(), user, pass);
+        // read password
+        const size_t pass_size = has_pass ? packet.read_u16() : 0;
+        if (pass_size > PICOMQTT_MAX_USERPASS_SIZE) {
+            connack(CRC_BAD_USERNAME_OR_PASSWORD);
+            return;
+        }
+        char pass[pass_size + 1];
+        if (!packet.read_string(pass, pass_size)) {
+            on_timeout();
+            return;
+        }
 
-        auto reply = build_packet(Packet::CONNACK, 0, 2);
-        reply.write_u8(0);  /* session present always set to zero */
-        reply.write_u8(connect_return_code);
-        reply.send();
+        const auto connect_return_code = this->server.auth(
+                                             client_id.c_str(),
+                                             has_user ? user : nullptr, has_pass ? pass : nullptr);
+
+        connack(connect_return_code);
     });
 }
 
@@ -99,24 +150,26 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
     std::list<uint8_t> suback_codes;
 
     while (subscribe.get_remaining_size()) {
-        buffer.reset();
-        const char * topic = buffer.read_string(subscribe, subscribe.read_u16());
-        uint8_t qos = subscribe.read_u8();
-        if (qos > 2) {
-            on_protocol_violation();
-            return;
-        }
-
-        uint8_t qos_granted = 0x80;
-
-        // TODO: check if topic is valid
-        if (!buffer.is_overflown()) {
+        const size_t topic_size = subscribe.read_u16();
+        if (topic_size > PICOMQTT_MAX_TOPIC_SIZE) {
+            subscribe.ignore(topic_size);
+            subscribe.read_u8();
+            suback_codes.push_back(0x80);
+        } else {
+            char topic[topic_size + 1];
+            if (!subscribe.read_string(topic, topic_size)) {
+                // connection error
+                return;
+            }
+            uint8_t qos = subscribe.read_u8();
+            if (qos > 2) {
+                on_protocol_violation();
+                return;
+            }
             Subscriber::subscribe(topic);
             server.on_subscribe(client_id.c_str(), topic);
-            qos_granted = 0;
+            suback_codes.push_back(0);
         }
-
-        suback_codes.push_back(qos_granted);
     }
 
     auto suback = build_packet(Packet::SUBACK, 0, 2 + suback_codes.size());
@@ -137,9 +190,15 @@ void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
     }
 
     while (unsubscribe.get_remaining_size()) {
-        buffer.reset();
-        const char * topic = buffer.read_string(unsubscribe, unsubscribe.read_u16());
-        if (!buffer.is_overflown()) {
+        const size_t topic_size = unsubscribe.read_u16();
+        if (topic_size > PICOMQTT_MAX_TOPIC_SIZE) {
+            unsubscribe.ignore(topic_size);
+        } else {
+            char topic[topic_size + 1];
+            if (!unsubscribe.read_string(topic, topic_size)) {
+                // connection error
+                return;
+            }
             server.on_unsubscribe(client_id.c_str(), topic);
             Subscriber::unsubscribe(topic);
         }
@@ -174,7 +233,7 @@ void Server::Client::handle_packet(IncomingPacket & packet) {
 
 void Server::Client::loop() {
     TRACE_FUNCTION
-    if (keep_alive_millis && (client.get_millis_since_last_read() > keep_alive_millis)) {
+    if (keep_alive_millis && (get_millis_since_last_read() > keep_alive_millis)) {
         // ping timeout
         on_timeout();
         return;
@@ -211,10 +270,8 @@ int Server::IncomingPublish::read() {
     return ret;
 }
 
-Server::Server(uint16_t port, size_t client_buffer_size,
-               unsigned long keep_alive_tolerance_seconds,
-               unsigned long socket_timeout_seconds)
-    : server(port), buffer(client_buffer_size), keep_alive_tolerance_seconds(keep_alive_tolerance_seconds),
+Server::Server(uint16_t port, unsigned long keep_alive_tolerance_seconds, unsigned long socket_timeout_seconds)
+    : server(port), keep_alive_tolerance_seconds(keep_alive_tolerance_seconds),
       socket_timeout_seconds(socket_timeout_seconds) {
     TRACE_FUNCTION
 }
@@ -265,7 +322,7 @@ PrintMux Server::get_subscribed(const char * topic) {
 Publisher::Publish Server::publish(const char * topic, const size_t payload_size,
                                    uint8_t, bool, uint16_t) {
     TRACE_FUNCTION
-    return Publish(*this, get_subscribed(topic), buffer, topic, payload_size);
+    return Publish(*this, get_subscribed(topic), topic, payload_size);
 }
 
 }

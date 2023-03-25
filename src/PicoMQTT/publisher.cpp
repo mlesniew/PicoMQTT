@@ -3,12 +3,12 @@
 
 namespace PicoMQTT {
 
-Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
+Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
                             uint8_t flags, size_t total_size,
                             const char * topic, size_t topic_size,
                             uint16_t message_id)
     :
-    OutgoingPacket(this->print, buffer, Packet::PUBLISH, flags, total_size),
+    OutgoingPacket(this->print, Packet::PUBLISH, flags, total_size),
     qos((flags >> 1) & 0b11),
     message_id(message_id),
     print(print),
@@ -22,11 +22,11 @@ Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffe
     }
 }
 
-Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
+Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
                             const char * topic, size_t topic_size, size_t payload_size,
                             uint8_t qos, bool retain, bool dup, uint16_t message_id)
     : Publish(
-          publisher, print, buffer,
+          publisher, print,
           (dup ? 0b1000 : 0) | ((qos & 0b11) << 1) | (retain ? 1 : 0),  // flags
           2 + topic_size + (qos ? 2 : 0) + payload_size,  // total size
           topic, topic_size,  // topic
@@ -34,11 +34,11 @@ Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffe
     TRACE_FUNCTION
 }
 
-Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
+Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
                             const char * topic, size_t payload_size,
                             uint8_t qos, bool retain, bool dup, uint16_t message_id)
     : Publish(
-          publisher, print, buffer,
+          publisher, print,
           topic, strlen(topic), payload_size,
           qos, retain, dup, message_id) {
     TRACE_FUNCTION
@@ -46,7 +46,6 @@ Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print, Buffe
 
 Publisher::Publish::~Publish() {
     TRACE_FUNCTION
-    while ((pos < size) && write(0));
 }
 
 bool Publisher::Publish::send() {
@@ -58,7 +57,7 @@ bool Publisher::publish(const char * topic, const void * payload, const size_t p
                         uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION
     auto packet = publish(topic, payload_size, qos, retain, message_id);
-    packet.write(payload, payload_size);
+    packet.write((const uint8_t *) payload, payload_size);
     return packet.send();
 }
 
@@ -74,7 +73,7 @@ bool Publisher::publish(const String & topic, const String & payload,
     return publish(topic.c_str(), payload.c_str(), qos, retain, message_id);
 }
 
-bool Publisher::publish_P(const char * topic, const void * payload, const size_t payload_size,
+bool Publisher::publish_P(const char * topic, PGM_P payload, const size_t payload_size,
                           uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION;
     auto packet = publish(topic, payload_size, qos, retain, message_id);
@@ -82,7 +81,7 @@ bool Publisher::publish_P(const char * topic, const void * payload, const size_t
     return packet.send();
 }
 
-bool Publisher::publish_P(const char * topic, const char * payload,
+bool Publisher::publish_P(const char * topic, PGM_P payload,
                           uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION
     return publish_P(topic, payload, strlen_P(payload), qos, retain, message_id);

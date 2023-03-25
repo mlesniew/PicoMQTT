@@ -16,7 +16,7 @@ IncomingPacket::IncomingPacket(IncomingPacket && other)
 
 IncomingPacket::~IncomingPacket() {
     TRACE_FUNCTION
-#ifdef MQTT_DEBUG
+#ifdef PICOMQTT_DEBUG
     if (pos != size) {
         Serial.print(F("IncomingPacket read incorrect number of bytes: "));
         Serial.print(pos);
@@ -67,7 +67,7 @@ int IncomingPacket::available() {
 int IncomingPacket::peek() {
     TRACE_FUNCTION
     if (!get_remaining_size()) {
-#if MQTT_DEBUG
+#if PICOMQTT_DEBUG
         Serial.println(F("Attempt to peek beyond end of IncomingPacket."));
 #endif
         return -1;
@@ -78,7 +78,7 @@ int IncomingPacket::peek() {
 int IncomingPacket::read() {
     TRACE_FUNCTION
     if (!get_remaining_size()) {
-#if MQTT_DEBUG
+#if PICOMQTT_DEBUG
         Serial.println(F("Attempt to read beyond end of IncomingPacket."));
 #endif
         return -1;
@@ -94,7 +94,7 @@ int IncomingPacket::read(uint8_t * buf, size_t size) {
     TRACE_FUNCTION
     const size_t remaining = get_remaining_size();
     const size_t read_size = remaining < size ? remaining : size;
-#if MQTT_DEBUG
+#if PICOMQTT_DEBUG
     if (size > remaining) {
         Serial.println(F("Attempt to read buf beyond end of IncomingPacket."));
     }

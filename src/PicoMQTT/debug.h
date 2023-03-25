@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef MQTT_DEBUG_TRACE_FUNCTIONS
+#include "config.h"
+
+#ifdef PICOMQTT_DEBUG_TRACE_FUNCTIONS
 
 #include <Arduino.h>
 

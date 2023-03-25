@@ -6,39 +6,9 @@
 
 namespace PicoMQTT {
 
-ClientWrapper::ClientWrapper(::Client & client, unsigned long socket_timeout_seconds):
-    socket_timeout_millis(socket_timeout_seconds * 1000), client(client), last_read(0), last_write(0) {
+ClientWrapper::ClientWrapper(const ::WiFiClient & client, unsigned long socket_timeout_seconds):
+    WiFiClient(client), socket_timeout_millis(socket_timeout_seconds * 1000) {
     TRACE_FUNCTION
-}
-
-int ClientWrapper::connect(IPAddress ip, uint16_t port) {
-    TRACE_FUNCTION
-    return client.connect(ip, port);
-}
-
-int ClientWrapper::connect(const char * host, uint16_t port) {
-    TRACE_FUNCTION
-    return client.connect(host, port);
-}
-
-void ClientWrapper::flush() {
-    TRACE_FUNCTION
-    client.flush();
-}
-
-void ClientWrapper::stop() {
-    TRACE_FUNCTION
-    client.stop();
-}
-
-uint8_t ClientWrapper::connected() {
-    TRACE_FUNCTION
-    return client.connected();
-}
-
-ClientWrapper::operator bool() {
-    TRACE_FUNCTION
-    return bool(client);
 }
 
 // reads
@@ -46,11 +16,11 @@ int ClientWrapper::available_wait(unsigned long timeout) {
     TRACE_FUNCTION
     const unsigned long start_millis = millis();
     while (true) {
-        const int ret = client.available();
+        const int ret = available();
         if (ret > 0) {
             return ret;
         }
-        if (!client.connected()) {
+        if (!connected()) {
             // A disconnected client might still have unread data waiting in buffers.  Don't move this check earlier.
             return 0;
         }
@@ -60,11 +30,6 @@ int ClientWrapper::available_wait(unsigned long timeout) {
         }
         yield();
     }
-}
-
-int ClientWrapper::available() {
-    TRACE_FUNCTION
-    return client.available();
 }
 
 int ClientWrapper::read(uint8_t * buf, size_t size) {
@@ -79,28 +44,27 @@ int ClientWrapper::read(uint8_t * buf, size_t size) {
         if (elapsed_millis > socket_timeout_millis) {
             // timeout
             stop();
-            return 0;
+            break;
         }
 
         const unsigned long remaining_millis = socket_timeout_millis - elapsed_millis;
 
-        const int available = available_wait(remaining_millis);
-        if (!available) {
+        const int available_size = available_wait(remaining_millis);
+        if (available_size <= 0) {
             // timeout
             stop();
-            return 0;
+            break;
         }
 
-        const int bytes_to_read = size - ret < (size_t) available ? size - ret : (size_t) available;
+        const int chunk_size = size - ret < (size_t) available_size ? size - ret : (size_t) available_size;
 
-        const int bytes_read = client.read(buf + ret, bytes_to_read);
+        const int bytes_read = WiFiClient::read(buf + ret, chunk_size);
         if (bytes_read <= 0) {
             // connection error
             stop();
-            return 0;
+            break;
         }
 
-        last_read = millis();
         ret += bytes_read;
     }
 
@@ -112,7 +76,7 @@ int ClientWrapper::read() {
     if (!available_wait(socket_timeout_millis)) {
         return -1;
     }
-    return client.read();
+    return WiFiClient::read();
 }
 
 int ClientWrapper::peek() {
@@ -120,7 +84,7 @@ int ClientWrapper::peek() {
     if (!available_wait(socket_timeout_millis)) {
         return -1;
     }
-    return client.peek();
+    return WiFiClient::peek();
 }
 
 // writes
@@ -128,15 +92,14 @@ size_t ClientWrapper::write(const uint8_t * buffer, size_t size) {
     TRACE_FUNCTION
     size_t ret = 0;
 
-    while (client.connected() && ret < size) {
-        const int bytes_written = client.write(buffer + ret, size - ret);
+    while (connected() && ret < size) {
+        const int bytes_written = WiFiClient::write(buffer + ret, size - ret);
         if (bytes_written <= 0) {
             // connection error
             stop();
             return 0;
         }
 
-        last_write = millis();
         ret += bytes_written;
     }
 
@@ -146,16 +109,6 @@ size_t ClientWrapper::write(const uint8_t * buffer, size_t size) {
 size_t ClientWrapper::write(uint8_t value) {
     TRACE_FUNCTION
     return write(&value, 1);
-}
-
-unsigned long ClientWrapper::get_millis_since_last_read() const {
-    TRACE_FUNCTION
-    return millis() - last_read;
-}
-
-unsigned long ClientWrapper::get_millis_since_last_write() const {
-    TRACE_FUNCTION
-    return millis() - last_write;
 }
 
 }

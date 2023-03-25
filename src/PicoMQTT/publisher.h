@@ -11,17 +11,17 @@ class Publisher {
     public:
         class Publish: public OutgoingPacket {
             private:
-                Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
+                Publish(Publisher & publisher, const PrintMux & print,
                         uint8_t flags, size_t total_size,
                         const char * topic, size_t topic_size,
                         uint16_t message_id);
 
             public:
-                Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
+                Publish(Publisher & publisher, const PrintMux & print,
                         const char * topic, size_t topic_size, size_t payload_size,
                         uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0);
 
-                Publish(Publisher & publisher, const PrintMux & print, Buffer & buffer,
+                Publish(Publisher & publisher, const PrintMux & print,
                         const char * topic, size_t payload_size,
                         uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0);
 
@@ -47,10 +47,10 @@ class Publisher {
         bool publish(const String & topic, const String & payload,
                      uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
 
-        bool publish_P(const char * topic, const void * payload, const size_t payload_size,
+        bool publish_P(const char * topic, PGM_P payload, const size_t payload_size,
                        uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
 
-        bool publish_P(const char * topic, const char * payload,
+        bool publish_P(const char * topic, PGM_P payload,
                        uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
 
     protected:

@@ -4,18 +4,18 @@
 
 namespace PicoMQTT {
 
-Connection::Connection(
-    ::Client & client, Buffer & buffer,
-    unsigned long keep_alive_seconds, unsigned long socket_timeout_seconds) :
+Connection::Connection(const ::WiFiClient & client, unsigned long keep_alive_seconds,
+                       unsigned long socket_timeout_seconds) :
     client(client, socket_timeout_seconds),
-    buffer(buffer),
-    keep_alive_millis(keep_alive_seconds * 1000) {
+    keep_alive_millis(keep_alive_seconds * 1000),
+    last_read(millis()), last_write(millis()) {
     TRACE_FUNCTION
 }
 
 OutgoingPacket Connection::build_packet(Packet::Type type, uint8_t flags, size_t length) {
     TRACE_FUNCTION
-    auto ret = OutgoingPacket(client, buffer, type, flags, length);
+    last_write = millis();
+    auto ret = OutgoingPacket(client, type, flags, length);
     ret.write_header();
     return ret;
 }
@@ -57,6 +57,8 @@ void Connection::wait_for_reply(Packet::Type type, std::function<void(IncomingPa
         if (!packet) {
             break;
         }
+
+        last_read = millis();
 
         if (packet.get_type() == type) {
             handler(packet);
@@ -147,6 +149,16 @@ void Connection::handle_packet(IncomingPacket & packet) {
     }
 }
 
+unsigned long Connection::get_millis_since_last_read() const {
+    TRACE_FUNCTION
+    return millis() - last_read;
+}
+
+unsigned long Connection::get_millis_since_last_write() const {
+    TRACE_FUNCTION
+    return millis() - last_write;
+}
+
 void Connection::loop() {
     TRACE_FUNCTION
 
@@ -156,6 +168,7 @@ void Connection::loop() {
         if (!packet.is_valid()) {
             return;
         }
+        last_read = millis();
         handle_packet(packet);
     }
 }
