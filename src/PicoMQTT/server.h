@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <set>
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
@@ -10,15 +11,14 @@
 #include "connection.h"
 #include "publisher.h"
 #include "subscriber.h"
-#include "message_listener.h"
 
 namespace PicoMQTT {
 
-class Server: public Publisher, public Subscriber, public MessageListener {
+class BasicServer: public Publisher {
     public:
         class Client: public Connection, public Subscriber {
             public:
-                Client(Server & server, const WiFiClient & client);
+                Client(BasicServer & server, const WiFiClient & client);
                 Client(const Client &);
 
                 void on_message(const char * topic, IncomingPacket & packet) override;
@@ -28,10 +28,15 @@ class Server: public Publisher, public Subscriber, public MessageListener {
 
                 virtual void loop() override;
 
-            protected:
-                Server & server;
+                virtual const char * get_subscription_pattern(SubscriptionId id) const override;
+                virtual SubscriptionId get_subscription(const char * topic) const override;
+                virtual SubscriptionId subscribe(const char * topic_filter) override;
+                virtual void unsubscribe(const char * topic_filter) override;
 
+            protected:
+                BasicServer & server;
                 String client_id;
+                std::set<Subscription> subscriptions;
 
                 virtual void on_subscribe(IncomingPacket & packet);
                 virtual void on_unsubscribe(IncomingPacket & packet);
@@ -52,27 +57,28 @@ class Server: public Publisher, public Subscriber, public MessageListener {
                 Publish & publish;
         };
 
-        Server(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10, unsigned long socket_timeout_seconds = 5);
+        BasicServer(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10,
+                    unsigned long socket_timeout_seconds = 5);
 
         void loop();
 
         void begin();
         void stop();
 
+        using Publisher::publish;
         virtual Publish publish(const char * topic, const size_t payload_size,
                                 uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
 
-        void publish(const char * topic, IncomingPacket & packet);
-
+    protected:
+        virtual void on_message(const char * topic, IncomingPacket & packet);
         virtual Connection::ConnectReturnCode auth(const char * client_id, const char * username, const char * password) { return Connection::CRC_ACCEPTED; }
 
-        virtual void on_connect(const char * client_id) {}
-        virtual void on_disconnect(const char * client_id) {}
+        virtual void on_connected(const char * client_id) {}
+        virtual void on_disconnected(const char * client_id) {}
 
         virtual void on_subscribe(const char * client_id, const char * topic) {}
         virtual void on_unsubscribe(const char * client_id, const char * topic) {}
 
-    protected:
         virtual PrintMux get_subscribed(const char * topic);
 
         WiFiServer server;
@@ -80,6 +86,13 @@ class Server: public Publisher, public Subscriber, public MessageListener {
 
         const unsigned long keep_alive_tolerance_seconds;
         const unsigned long socket_timeout_seconds;
+
+};
+
+class Server: public BasicServer, public SubscribedMessageListener {
+    public:
+        virtual void on_message(const char * topic, IncomingPacket & packet) override;
+
 };
 
 }

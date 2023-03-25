@@ -4,15 +4,14 @@
 
 namespace PicoMQTT {
 
-Server::Client::Client(const Server::Client & other)
+BasicServer::Client::Client(const BasicServer::Client & other)
     : Connection(other.client, 0),
-      Subscriber(other),
       server(other.server),
       client_id(other.client_id) {
     TRACE_FUNCTION
 }
 
-Server::Client::Client(Server & server, const WiFiClient & client)
+BasicServer::Client::Client(BasicServer & server, const WiFiClient & client)
     : Connection(client, 0, server.socket_timeout_seconds), server(server), client_id("<unknown>") {
     TRACE_FUNCTION
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
@@ -123,7 +122,7 @@ Server::Client::Client(Server & server, const WiFiClient & client)
     });
 }
 
-void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
+void BasicServer::Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
 
     const size_t payload_size = packet.get_remaining_size();
@@ -138,7 +137,7 @@ void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
     publish.send();
 }
 
-void Server::Client::on_subscribe(IncomingPacket & subscribe) {
+void BasicServer::Client::on_subscribe(IncomingPacket & subscribe) {
     TRACE_FUNCTION
     const uint16_t message_id = subscribe.read_u16();
 
@@ -166,7 +165,7 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
                 on_protocol_violation();
                 return;
             }
-            Subscriber::subscribe(topic);
+            this->subscribe(topic);
             server.on_subscribe(client_id.c_str(), topic);
             suback_codes.push_back(0);
         }
@@ -180,7 +179,7 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
     suback.send();
 }
 
-void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
+void BasicServer::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
     TRACE_FUNCTION
     const uint16_t message_id = unsubscribe.read_u16();
 
@@ -200,7 +199,7 @@ void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
                 return;
             }
             server.on_unsubscribe(client_id.c_str(), topic);
-            Subscriber::unsubscribe(topic);
+            this->unsubscribe(topic);
         }
     }
 
@@ -209,7 +208,36 @@ void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
     unsuback.send();
 }
 
-void Server::Client::handle_packet(IncomingPacket & packet) {
+const char * BasicServer::Client::get_subscription_pattern(BasicServer::Client::SubscriptionId id) const {
+    for (const auto & pattern : subscriptions)
+        if (pattern.id == id) {
+            return pattern.c_str();
+        }
+    return nullptr;
+}
+
+Server::SubscriptionId BasicServer::Client::get_subscription(const char * topic) const {
+    TRACE_FUNCTION
+    for (const auto & pattern : subscriptions)
+        if (topic_matches(pattern.c_str(), topic)) {
+            return pattern.id;
+        }
+    return 0;
+}
+
+BasicServer::Client::SubscriptionId BasicServer::Client::subscribe(const char * topic_filter) {
+    TRACE_FUNCTION
+    const Subscription subscription(topic_filter);
+    subscriptions.insert(subscription);
+    return subscription.id;
+}
+
+void BasicServer::Client::unsubscribe(const char * topic_filter) {
+    TRACE_FUNCTION
+    subscriptions.erase(topic_filter);
+}
+
+void BasicServer::Client::handle_packet(IncomingPacket & packet) {
     TRACE_FUNCTION
 
     switch (packet.get_type()) {
@@ -231,7 +259,7 @@ void Server::Client::handle_packet(IncomingPacket & packet) {
     }
 }
 
-void Server::Client::loop() {
+void BasicServer::Client::loop() {
     TRACE_FUNCTION
     if (keep_alive_millis && (get_millis_since_last_read() > keep_alive_millis)) {
         // ping timeout
@@ -242,17 +270,17 @@ void Server::Client::loop() {
     Connection::loop();
 }
 
-Server::IncomingPublish::IncomingPublish(IncomingPacket & packet, Publish & publish)
+BasicServer::IncomingPublish::IncomingPublish(IncomingPacket & packet, Publish & publish)
     : IncomingPacket(std::move(packet)), publish(publish) {
     TRACE_FUNCTION
 }
 
-Server::IncomingPublish::~IncomingPublish() {
+BasicServer::IncomingPublish::~IncomingPublish() {
     TRACE_FUNCTION
     pos += publish.write_from_client(client, get_remaining_size());
 }
 
-int Server::IncomingPublish::read(uint8_t * buf, size_t size) {
+int BasicServer::IncomingPublish::read(uint8_t * buf, size_t size) {
     TRACE_FUNCTION
     const int ret = IncomingPacket::read(buf, size);
     if (ret > 0) {
@@ -261,7 +289,7 @@ int Server::IncomingPublish::read(uint8_t * buf, size_t size) {
     return ret;
 }
 
-int Server::IncomingPublish::read() {
+int BasicServer::IncomingPublish::read() {
     TRACE_FUNCTION
     const int ret = IncomingPacket::read();
     if (ret >= 0) {
@@ -270,37 +298,38 @@ int Server::IncomingPublish::read() {
     return ret;
 }
 
-Server::Server(uint16_t port, unsigned long keep_alive_tolerance_seconds, unsigned long socket_timeout_seconds)
+BasicServer::BasicServer(uint16_t port, unsigned long keep_alive_tolerance_seconds,
+                         unsigned long socket_timeout_seconds)
     : server(port), keep_alive_tolerance_seconds(keep_alive_tolerance_seconds),
       socket_timeout_seconds(socket_timeout_seconds) {
     TRACE_FUNCTION
 }
 
-void Server::begin() {
+void BasicServer::begin() {
     TRACE_FUNCTION
     server.begin();
 }
 
-void Server::stop() {
+void BasicServer::stop() {
     TRACE_FUNCTION
     server.stop();
     clients.clear();
 }
 
-void Server::loop() {
+void BasicServer::loop() {
     TRACE_FUNCTION
 
     while (server.hasClient()) {
         auto client = Client(*this, server.accept());
         clients.push_back(client);
-        on_connect(client.get_client_id());
+        on_connected(client.get_client_id());
     }
 
     for (auto it = clients.begin(); it != clients.end();) {
         it->loop();
 
         if (!it->connected()) {
-            on_disconnect(it->get_client_id());
+            on_disconnected(it->get_client_id());
             clients.erase(it++);
         } else {
             ++it;
@@ -308,7 +337,7 @@ void Server::loop() {
     }
 }
 
-PrintMux Server::get_subscribed(const char * topic) {
+PrintMux BasicServer::get_subscribed(const char * topic) {
     TRACE_FUNCTION
     PrintMux ret;
     for (auto & client : clients) {
@@ -319,10 +348,18 @@ PrintMux Server::get_subscribed(const char * topic) {
     return ret;
 }
 
-Publisher::Publish Server::publish(const char * topic, const size_t payload_size,
-                                   uint8_t, bool, uint16_t) {
+Publisher::Publish BasicServer::publish(const char * topic, const size_t payload_size,
+                                        uint8_t, bool, uint16_t) {
     TRACE_FUNCTION
     return Publish(*this, get_subscribed(topic), topic, payload_size);
+}
+
+void BasicServer::on_message(const char * topic, IncomingPacket & packet) {
+}
+
+void Server::on_message(const char * topic, IncomingPacket & packet) {
+    TRACE_FUNCTION
+    fire_message_callbacks(topic, packet);
 }
 
 }

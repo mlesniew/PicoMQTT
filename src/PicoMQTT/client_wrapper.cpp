@@ -6,6 +6,11 @@
 
 namespace PicoMQTT {
 
+ClientWrapper::ClientWrapper(unsigned long socket_timeout_seconds): socket_timeout_millis(
+        socket_timeout_seconds * 1000) {
+    TRACE_FUNCTION
+}
+
 ClientWrapper::ClientWrapper(const ::WiFiClient & client, unsigned long socket_timeout_seconds):
     WiFiClient(client), socket_timeout_millis(socket_timeout_seconds * 1000) {
     TRACE_FUNCTION

@@ -6,6 +6,7 @@ namespace PicoMQTT {
 
 class ClientWrapper: public ::WiFiClient {
     public:
+        ClientWrapper(unsigned long socket_timeout_seconds);
         ClientWrapper(const WiFiClient & client, unsigned long socket_timeout_seconds);
         ClientWrapper(const ClientWrapper &) = default;
 

@@ -4,6 +4,13 @@
 
 namespace PicoMQTT {
 
+Connection::Connection(unsigned long keep_alive_seconds, unsigned long socket_timeout_seconds) :
+    client(socket_timeout_seconds),
+    keep_alive_millis(keep_alive_seconds * 1000),
+    last_read(millis()), last_write(millis()) {
+    TRACE_FUNCTION
+}
+
 Connection::Connection(const ::WiFiClient & client, unsigned long keep_alive_seconds,
                        unsigned long socket_timeout_seconds) :
     client(client, socket_timeout_seconds),
@@ -72,14 +79,6 @@ void Connection::wait_for_reply(Packet::Type type, std::function<void(IncomingPa
     if (client.connected()) {
         on_timeout();
     }
-}
-
-void Connection::on_message(const char * topic, IncomingPacket & packet) {
-    TRACE_FUNCTION
-}
-
-void Connection::on_topic_too_long(const IncomingPacket & packet) {
-    TRACE_FUNCTION
 }
 
 void Connection::send_ack(Packet::Type ack_type, uint16_t msg_id) {

@@ -3,12 +3,18 @@
 
 namespace PicoMQTT {
 
-Client::Client(const ::WiFiClient & client, unsigned long keep_alive_seconds, unsigned long socket_timeout_seconds)
+BasicClient::BasicClient(unsigned long keep_alive_seconds, unsigned long socket_timeout_seconds)
+    : Connection(keep_alive_seconds, socket_timeout_seconds) {
+    TRACE_FUNCTION
+}
+
+BasicClient::BasicClient(const ::WiFiClient & client, unsigned long keep_alive_seconds,
+                         unsigned long socket_timeout_seconds)
     : Connection(client, keep_alive_seconds, socket_timeout_seconds) {
     TRACE_FUNCTION
 }
 
-bool Client::connect(
+bool BasicClient::connect(
     const char * host,
     uint16_t port,
     const char * id,
@@ -106,12 +112,7 @@ bool Client::connect(
     return client.connected();
 }
 
-void Client::on_message(const char * topic, IncomingPacket & packet) {
-    TRACE_FUNCTION
-    MessageListener::on_message(topic, packet);
-}
-
-void Client::loop() {
+void BasicClient::loop() {
     TRACE_FUNCTION
 
     if (client.connected() && get_millis_since_last_write() >= keep_alive_millis) {
@@ -123,8 +124,8 @@ void Client::loop() {
     Connection::loop();
 }
 
-Publisher::Publish Client::publish(const char * topic, const size_t payload_size,
-                                   uint8_t qos, bool retain, uint16_t message_id) {
+Publisher::Publish BasicClient::publish(const char * topic, const size_t payload_size,
+                                        uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION
     return Publish(
                *this, client,
@@ -136,7 +137,7 @@ Publisher::Publish Client::publish(const char * topic, const size_t payload_size
            );
 }
 
-bool Client::on_publish_complete(const Publish & publish) {
+bool BasicClient::on_publish_complete(const Publish & publish) {
     TRACE_FUNCTION
     if (publish.qos == 0) {
         return true;
@@ -150,7 +151,7 @@ bool Client::on_publish_complete(const Publish & publish) {
     return confirmed;
 }
 
-bool Client::subscribe(const String & topic, uint8_t qos, uint8_t * qos_granted) {
+bool BasicClient::subscribe(const String & topic, uint8_t qos, uint8_t * qos_granted) {
     TRACE_FUNCTION
     if (qos > 1) {
         return false;
@@ -186,7 +187,7 @@ bool Client::subscribe(const String & topic, uint8_t qos, uint8_t * qos_granted)
     return client.connected();
 }
 
-bool Client::unsubscribe(const String & topic) {
+bool BasicClient::unsubscribe(const String & topic) {
     TRACE_FUNCTION
 
     const size_t topic_size = topic.length();
@@ -204,6 +205,49 @@ bool Client::unsubscribe(const String & topic) {
     });
 
     return client.connected();
+}
+
+Client::Client(const char * host, uint16_t port, const char * id, const char * user, const char * password)
+    : host(host), port(port), client_id(id), username(user), password(password) {
+    TRACE_FUNCTION
+}
+
+Client::SubscriptionId Client::subscribe(const char * topic_filter, MessageCallback callback) {
+    TRACE_FUNCTION
+    BasicClient::subscribe(topic_filter);
+    return SubscribedMessageListener::subscribe(topic_filter, callback);
+}
+
+void Client::unsubscribe(const char * topic_filter) {
+    TRACE_FUNCTION
+    BasicClient::unsubscribe(topic_filter);
+    SubscribedMessageListener::unsubscribe(topic_filter);
+}
+
+void Client::on_message(const char * topic, IncomingPacket & packet) {
+    SubscribedMessageListener::fire_message_callbacks(topic, packet);
+}
+
+void Client::loop() {
+    TRACE_FUNCTION
+    if (!client.connected()) {
+        if (host.isEmpty() || !port) {
+            return;
+        }
+
+        if (!connect(host.c_str(), port,
+                     client_id.isEmpty() ? "" : client_id.c_str(),
+                     username.isEmpty() ? nullptr : username.c_str(),
+                     password.isEmpty() ? nullptr : password.c_str())) {
+            return;
+        }
+
+        for (const auto & kv : subscriptions) {
+            BasicClient::subscribe(kv.first.c_str());
+        }
+    }
+
+    BasicClient::loop();
 }
 
 }
