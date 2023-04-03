@@ -97,7 +97,7 @@ BasicServer::Client::Client(BasicServer & server, const WiFiClient & client)
             return;
         }
         char user[user_size + 1];
-        if (!packet.read_string(user, user_size)) {
+        if (user_size && !packet.read_string(user, user_size)) {
             on_timeout();
             return;
         }
@@ -109,7 +109,7 @@ BasicServer::Client::Client(BasicServer & server, const WiFiClient & client)
             return;
         }
         char pass[pass_size + 1];
-        if (!packet.read_string(pass, pass_size)) {
+        if (pass_size && !packet.read_string(pass, pass_size)) {
             on_timeout();
             return;
         }
