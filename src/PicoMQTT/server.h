@@ -71,7 +71,7 @@ class BasicServer: public Publisher {
 
     protected:
         virtual void on_message(const char * topic, IncomingPacket & packet);
-        virtual Connection::ConnectReturnCode auth(const char * client_id, const char * username, const char * password) { return Connection::CRC_ACCEPTED; }
+        virtual ConnectReturnCode auth(const char * client_id, const char * username, const char * password) { return CRC_ACCEPTED; }
 
         virtual void on_connected(const char * client_id) {}
         virtual void on_disconnected(const char * client_id) {}
@@ -91,6 +91,10 @@ class BasicServer: public Publisher {
 
 class Server: public BasicServer, public SubscribedMessageListener {
     public:
+        Server(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10,
+               unsigned long socket_timeout_seconds = 5) : BasicServer(port, keep_alive_tolerance_seconds, socket_timeout_seconds) {
+            begin();
+        }
         virtual void on_message(const char * topic, IncomingPacket & packet) override;
 
 };

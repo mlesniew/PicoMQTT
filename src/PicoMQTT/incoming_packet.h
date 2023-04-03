@@ -23,7 +23,9 @@ class IncomingPacket: public Packet, public Client {
         virtual int peek() override;
         virtual int read() override;
         virtual int read(uint8_t * buf, size_t size) override;
-        virtual operator bool() override;
+        // This operator is not marked explicit in the Client base class.  Still, we're marking it explicit here
+        // to block implicit conversions to integer types.
+        virtual explicit operator bool() override;
         virtual size_t write(const uint8_t * buffer, size_t size) override;
         virtual size_t write(uint8_t value) override final;
         virtual uint8_t connected() override;

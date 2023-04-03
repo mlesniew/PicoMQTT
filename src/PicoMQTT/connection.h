@@ -11,20 +11,20 @@
 
 namespace PicoMQTT {
 
+enum ConnectReturnCode : uint8_t {
+    CRC_ACCEPTED = 0,
+    CRC_UNACCEPTABLE_PROTOCOL_VERSION = 1,
+    CRC_IDENTIFIER_REJECTED = 2,
+    CRC_SERVER_UNAVAILABLE = 3,
+    CRC_BAD_USERNAME_OR_PASSWORD = 4,
+    CRC_NOT_AUTHORIZED = 5,
+
+    // internal
+    CRC_UNDEFINED = 255,
+};
+
 class Connection {
     public:
-        enum ConnectReturnCode : uint8_t {
-            CRC_ACCEPTED = 0,
-            CRC_UNACCEPTABLE_PROTOCOL_VERSION = 1,
-            CRC_IDENTIFIER_REJECTED = 2,
-            CRC_SERVER_UNAVAILABLE = 3,
-            CRC_BAD_USERNAME_OR_PASSWORD = 4,
-            CRC_NOT_AUTHORIZED = 5,
-
-            // internal
-            CRC_UNDEFINED = 255,
-        };
-
         Connection(unsigned long keep_alive_seconds = 0, unsigned long socket_timeout_seconds = 15);
         Connection(const ::WiFiClient & client, unsigned long keep_alive_seconds = 0,
                    unsigned long socket_timeout_seconds = 15);
