@@ -1,0 +1,33 @@
+---
+name: CI
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio
+      - name: Build examples
+        run: |
+          for example in examples/*; do
+            cd "$example"
+            platformio init --board d1_mini
+            mv *.ino src/
+            ln -s ../../../ lib/PicoMQTT
+            pio run
+            cd ../..
+          done
