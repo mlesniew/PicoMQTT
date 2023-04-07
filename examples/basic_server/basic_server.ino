@@ -24,6 +24,8 @@ void setup() {
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED) { delay(1000); }
     Serial.printf("WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
+
+    mqtt.begin();
 }
 
 void loop() {

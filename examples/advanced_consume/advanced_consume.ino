@@ -85,6 +85,8 @@ void setup() {
         // is an error.
         Serial.printf("Received message in topic '%s', it contained %u digits\n", topic, digit_count);
     });
+
+    mqtt.begin();
 }
 
 void loop() {

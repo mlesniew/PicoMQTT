@@ -33,6 +33,8 @@ void setup() {
         // payload might be binary, but PicoMQTT guarantees that it's zero-terminated
         Serial.printf("Received message in topic '%s': %s\n", topic, payload);
     });
+
+    mqtt.begin();
 }
 
 void loop() {
@@ -41,7 +43,7 @@ void loop() {
     // Publish a greeting message every 3 seconds.
     if (millis() - last_publish_time >= 3000) {
         // We're publishing to a topic, which we're subscribed too, but these message will *not* be delivered locally.
-        String topic = "picomqtt/esp-" + String(ESP.getChipId(), HEX);
+        String topic = "picomqtt/esp-" + WiFi.macAddress();
         String message = "Hello #" + String(greeting_number++);
         Serial.printf("Publishing message in topic '%s': %s\n", topic.c_str(), message.c_str());
         mqtt.publish(topic, message);

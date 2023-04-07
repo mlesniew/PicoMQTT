@@ -7,6 +7,11 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        board:
+          - d1_mini
+          - esp32dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,7 +30,7 @@ jobs:
         run: |
           for example in examples/*; do
             cd "$example"
-            platformio init --board d1_mini
+            platformio init --board ${{ matrix.board }}
             mv *.ino src/
             ln -s ../../../ lib/PicoMQTT
             pio run

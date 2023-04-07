@@ -13,12 +13,12 @@
 #endif
 
 PicoMQTT::Client mqtt(
-        "broker.hivemq.com",    // broker address (or IP)
-        1883,                   // broker port (defaults to 1883)
-        "esp-client",           // Client ID
-        "username",             // MQTT username
-        "password"              // MQTT password
-        );
+    "broker.hivemq.com",    // broker address (or IP)
+    1883,                   // broker port (defaults to 1883)
+    "esp-client",           // Client ID
+    "username",             // MQTT username
+    "password"              // MQTT password
+);
 
 // PicoMQTT::Client mqtt;       // This will work too, but configuration will have to be set later (e.g. in setup())
 
@@ -36,7 +36,7 @@ void setup() {
     // MQTT settings can be changed or set here instead
     mqtt.host = "broker.hivemq.com";
     mqtt.port = 1883;
-    mqtt.client_id = "esp-" + String(ESP.getChipId(), HEX);
+    mqtt.client_id = "esp-" + WiFi.macAddress();
     mqtt.username = "username";
     mqtt.password = "secret";
 
@@ -45,6 +45,8 @@ void setup() {
         // payload might be binary, but PicoMQTT guarantees that it's zero-terminated
         Serial.printf("Received message in topic '%s': %s\n", topic, payload);
     });
+
+    mqtt.begin();
 }
 
 void loop() {

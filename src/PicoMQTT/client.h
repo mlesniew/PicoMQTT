@@ -3,14 +3,15 @@
 #include <Arduino.h>
 
 #include "connection.h"
-#include "publisher.h"
 #include "incoming_packet.h"
 #include "outgoing_packet.h"
+#include "pico_interface.h"
+#include "publisher.h"
 #include "subscriber.h"
 
 namespace PicoMQTT {
 
-class BasicClient: public Connection, public Publisher {
+class BasicClient: public PicoMQTTInterface, public Connection, public Publisher {
     public:
         BasicClient(unsigned long keep_alive_seconds = 60, unsigned long socket_timeout_seconds = 10);
 
@@ -32,7 +33,7 @@ class BasicClient: public Connection, public Publisher {
         bool subscribe(const String & topic, uint8_t qos = 0, uint8_t * qos_granted = nullptr);
         bool unsubscribe(const String & topic);
 
-        void loop();
+        void loop() override;
 
         virtual void on_connected() {}
 
@@ -49,7 +50,7 @@ class Client: public BasicClient, public SubscribedMessageListener {
         virtual SubscriptionId subscribe(const char * topic_filter, MessageCallback callback) override;
         virtual void unsubscribe(const char * topic_filter) override;
 
-        virtual void loop();
+        virtual void loop() override;
 
         String host;
         uint16_t port;

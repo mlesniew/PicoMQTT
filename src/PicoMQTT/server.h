@@ -4,17 +4,25 @@
 #include <set>
 
 #include <Arduino.h>
+
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#else
+#error "This board is not supported."
+#endif
 
 #include "debug.h"
 #include "incoming_packet.h"
 #include "connection.h"
 #include "publisher.h"
 #include "subscriber.h"
+#include "pico_interface.h"
 
 namespace PicoMQTT {
 
-class BasicServer: public Publisher {
+class BasicServer: public PicoMQTTInterface, public Publisher {
     public:
         class Client: public Connection, public Subscriber {
             public:
@@ -60,10 +68,9 @@ class BasicServer: public Publisher {
         BasicServer(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10,
                     unsigned long socket_timeout_seconds = 5);
 
-        void loop();
-
-        void begin();
-        void stop();
+        void begin() override;
+        void stop() override;
+        void loop() override;
 
         using Publisher::publish;
         virtual Publish publish(const char * topic, const size_t payload_size,
@@ -91,12 +98,7 @@ class BasicServer: public Publisher {
 
 class Server: public BasicServer, public SubscribedMessageListener {
     public:
-        Server(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10,
-               unsigned long socket_timeout_seconds = 5) : BasicServer(port, keep_alive_tolerance_seconds, socket_timeout_seconds) {
-            begin();
-        }
         virtual void on_message(const char * topic, IncomingPacket & packet) override;
-
 };
 
 }

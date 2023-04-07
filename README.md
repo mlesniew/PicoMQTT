@@ -1,6 +1,6 @@
 # PicoMQTT
 
-This is a lightweight and easy to use MQTT library for ESP8266 devices.
+This is a lightweight and easy to use MQTT library for ESP8266 and ESP32 devices.
 
 Features:
 * Client and broker mode supported
@@ -12,12 +12,12 @@ Features:
 Limitations:
 * Client only supports MQTT QoS levels 0 and 1
 * Broker only supports MQTT QoS level 0, ignores will and retained messages.
-* Currently only ESP8266-based boards are supported (tested on NodeMCU and Wemos D1 Mini).
+* Currently only ESP8266 and ESP32 boards are supported
 
 
 ## Installation
 
-Once you have the ESP8266 board and toolchain set up, you can install the library by adding it to your Arduino libraries folder.
+Once you have the ESP board and toolchain set up, you can install the library by adding it to your Arduino libraries folder.
 
 If you're using PlatformIO, clone this repository into your project's `lib/` subdirectory.
 
@@ -44,6 +44,9 @@ void setup() {
     mqtt.subscribe("#", [](const char * topic, const char * payload) {
         Serial.printf("Received message in topic '%s': %s\n", topic, payload);
     });
+
+    // Start the client
+    mqtt.begin();
 }
 
 void loop() {
@@ -73,6 +76,9 @@ void setup() {
     mqtt.subscribe("#", [](const char * topic, const char * payload) {
         Serial.printf("Received message in topic '%s': %s\n", topic, payload);
     });
+
+    // Start the broker
+    mqtt.begin();
 }
 
 void loop() {
@@ -134,6 +140,8 @@ void setup() {
         // To extract individual elements from the topic use:
         String wildcard_value = mqtt.get_topic_element(topic, 1);  // second parameter is the index (zero based)
     });
+
+    mqtt.begin();
 }
 
 void loop() {
