@@ -6,7 +6,7 @@ Features:
 * Client and broker mode supported
 * MQTT 3.1.1 implementation
 * Allows handling and sending arbitrary sized messages
-* High performance -- the broker can deliver thousands of messages per second
+* High performance -- the broker can deliver thousands of messages per second -- [see benchmarks](#benchmarks)
 * Low memory usage
 
 Limitations:
@@ -213,6 +213,26 @@ mqtt.subscribe("picomqtt/advanced", [](const char * topic, PicoMQTT::IncomingPac
 * When consuming or producing a message using the advanced API, don't call other MQTT methods.  Don't try to publish multiple messages at a time or publish a message while consuming another.
 * Even with this API, the topic size is still limited.  The limit can be increased by overriding values from [config.h](src/PicoMQTT/config.h).
 
+## Benchmarks
+
+Charts in this section show PicoMQTT how many messages a broker running on the ESP8266 and ESP32 was able to deliver per second per client depending on the payload size and the number of subscribed clients.
+* Test were executed using the library version from commit 406e879e8b25b84c1488c1e2789e4b3719dd1496
+* The library was using default configuration values (as defined in [config.h](src/PicoMQTT/config.h))
+* Measurements were done on a PC using scripts in [benchmark/](benchmark/)
+* The broker was configured to do nothing but forward the messages to subscribed clients, see [benchmark.ino](benchmark/benchmark.ino)
+* The ESPs were connecting to a router just next to them to avoid interference.  The test PC was connected to the same router using an Ethernet cable.
+
+### ESP8266
+
+![ESP8266 broker performance](doc/img/benchmark-esp8266.svg)
+
+[Get CSV](doc/benchmark/esp8266.csv)
+
+### ESP32
+
+![ESP32 broker performance](doc/img/benchmark-esp32.svg)
+
+[Get CSV](doc/benchmark/esp32.csv)
 
 ## License
 

@@ -1,0 +1,1129 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8" class="pygal-chart" viewBox="0 0 800 600">
+  <!--Generated with pygal 3.0.0 (lxml) ©Kozea 2012-2016 on 2023-04-08-->
+  <!--http://pygal.org-->
+  <!--http://github.com/Kozea/pygal-->
+  <defs>
+    <style type="text/css">/*
+ * This file is part of pygal
+ *
+ * A python svg graph plotting library
+ * Copyright © 2012 Kozea
+
+ * This library is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with pygal. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+/*
+ * Font-sizes from config, override with care
+ */
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  {
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .title {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 16px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .legends .legend text {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 14px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis text {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 10px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis text.major {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 10px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .text-overlay text.value {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 16px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .text-overlay text.label {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 10px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 14px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 text.no_data {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 64px;
+}
+
+/*
+ * This file is part of pygal
+ *
+ * A python svg graph plotting library
+ * Copyright © 2012 Kozea
+
+ * This library is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with pygal. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+/*
+ * Styles from config
+ */
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 {
+  background-color: rgba(249, 249, 249, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 path,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 rect,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 circle {
+  -webkit-transition: 150ms;
+  -moz-transition: 150ms;
+  transition: 150ms;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .graph &gt; .background {
+  fill: rgba(249, 249, 249, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .plot &gt; .background {
+  fill: rgba(255, 255, 255, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .graph {
+  fill: rgba(0, 0, 0, .87);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 text.no_data {
+  fill: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .title {
+  fill: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .legends .legend text {
+  fill: rgba(0, 0, 0, .87);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .legends .legend:hover text {
+  fill: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .line {
+  stroke: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .guide.line {
+  stroke: rgba(0, 0, 0, .54);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .major.line {
+  stroke: rgba(0, 0, 0, .87);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis text.major {
+  fill: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y .guides:hover .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .line-graph .axis.x .guides:hover .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .stackedline-graph .axis.x .guides:hover .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .xy-graph .axis.x .guides:hover .guide.line {
+  stroke: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .guides:hover text {
+  fill: rgba(0, 0, 0, 1);
+}
+
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .reactive {
+  fill-opacity: .7;
+  stroke-opacity: .8;
+  stroke-width: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .ci {
+    stroke: rgba(0, 0, 0, .87);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .reactive.active,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .active .reactive {
+  fill-opacity: .8;
+  stroke-opacity: .9;
+  stroke-width: 4;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .ci .reactive.active {
+  stroke-width: 1.5;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series text {
+  fill: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip rect {
+  fill: rgba(255, 255, 255, 1);
+  stroke: rgba(0, 0, 0, 1);
+  -webkit-transition: opacity 150ms;
+  -moz-transition: opacity 150ms;
+  transition: opacity 150ms;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip .label {
+  fill: rgba(0, 0, 0, .87);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip .label {
+  fill: rgba(0, 0, 0, .87);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip .legend {
+  font-size: .8em;
+  fill: rgba(0, 0, 0, .54);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip .x_label {
+  font-size: .6em;
+  fill: rgba(0, 0, 0, 1);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip .xlink {
+  font-size: .5em;
+  text-decoration: underline;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip .value {
+  font-size: 1.5em;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .bound {
+  font-size: .5em;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .max-value {
+  font-size: .75em;
+  fill: rgba(0, 0, 0, .54);
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .map-element {
+  fill: rgba(255, 255, 255, 1);
+  stroke: rgba(0, 0, 0, .54) !important;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .map-element .reactive {
+  fill-opacity: inherit;
+  stroke-opacity: inherit;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-0, #chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-0 a:visited {
+  stroke: #F44336;
+  fill: #F44336;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-1, #chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-1 a:visited {
+  stroke: #3F51B5;
+  fill: #3F51B5;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-2, #chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-2 a:visited {
+  stroke: #009688;
+  fill: #009688;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-3, #chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-3 a:visited {
+  stroke: #FFC107;
+  fill: #FFC107;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-4, #chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .color-4 a:visited {
+  stroke: #FF5722;
+  fill: #FF5722;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  .text-overlay .color-0 text {
+  fill: black;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  .text-overlay .color-1 text {
+  fill: black;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  .text-overlay .color-2 text {
+  fill: black;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  .text-overlay .color-3 text {
+  fill: black;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  .text-overlay .color-4 text {
+  fill: black;
+}
+
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series {
+
+  stroke-width: 50;
+
+}
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series.serie-0 {
+
+  stroke-width: 50;
+
+}
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series.serie-1 {
+
+  stroke-width: 50;
+
+}
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series.serie-2 {
+
+  stroke-width: 50;
+
+}
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series.serie-3 {
+
+  stroke-width: 50;
+
+}
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series.serie-4 {
+
+  stroke-width: 50;
+
+}
+
+/*
+ * This file is part of pygal
+ *
+ * A python svg graph plotting library
+ * Copyright © 2012 Kozea
+
+ * This library is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with pygal. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+*/
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 text.no_data {
+  text-anchor: middle;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .guide.line {
+  fill: none;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .centered {
+  text-anchor: middle;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .title {
+  text-anchor: middle;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .legends .legend text {
+  fill-opacity: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.x text {
+  text-anchor: middle;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.x:not(.web) text[transform] {
+  text-anchor: start;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.x:not(.web) text[transform].backwards {
+  text-anchor: end;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y text {
+  text-anchor: end;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y text[transform].backwards {
+  text-anchor: start;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y2 text {
+  text-anchor: start;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y2 text[transform].backwards {
+  text-anchor: end;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .guide.line {
+  stroke-dasharray: 4,4;
+  stroke: black;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .major.guide.line {
+  stroke-dasharray: 6,6;
+  stroke: black;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .horizontal .axis.y .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .horizontal .axis.y2 .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .vertical .axis.x .guide.line {
+  opacity: 0;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .horizontal .axis.always_show .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .vertical .axis.always_show .guide.line {
+  opacity: 1 !important;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y .guides:hover .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.y2 .guides:hover .guide.line,
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis.x .guides:hover .guide.line {
+  opacity: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .axis .guides:hover text {
+  opacity: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .nofill {
+  fill: none;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .subtle-fill {
+  fill-opacity: .2;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .dot {
+  stroke-width: 1px;
+  fill-opacity: 1;
+  stroke-opacity: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .dot.active {
+  stroke-width: 5px;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .dot.negative {
+  fill: transparent;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  text, #chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8  tspan {
+  stroke: none !important;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .series text.active {
+  opacity: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip rect {
+  fill-opacity: .95;
+  stroke-width: .5;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .tooltip text {
+  fill-opacity: 1;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .showable {
+  visibility: hidden;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .showable.shown {
+  visibility: visible;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .gauge-background {
+  fill: rgba(229, 229, 229, 1);
+  stroke: none;
+}
+
+#chart-3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8 .bg-lines {
+  stroke: rgba(249, 249, 249, 1);
+  stroke-width: 2px;
+}
+</style>
+    <script type="text/javascript">window.pygal = window.pygal || {};window.pygal.config = window.pygal.config || {};window.pygal.config['3974eb2c-5ce5-4e8e-9b2e-68445df4f6e8'] = {"allow_interruptions": false, "box_mode": "extremes", "classes": ["pygal-chart"], "css": ["file://style.css", "file://graph.css"], "defs": [], "disable_xml_declaration": false, "dots_size": 2.5, "dynamic_print_values": false, "explicit_size": false, "fill": false, "force_uri_protocol": "https", "formatter": null, "half_pie": false, "height": 600, "include_x_axis": false, "inner_radius": 0, "interpolate": null, "interpolation_parameters": {}, "interpolation_precision": 250, "inverse_y_axis": false, "js": ["//kozea.github.io/pygal.js/2.0.x/pygal-tooltips.min.js"], "legend_at_bottom": true, "legend_at_bottom_columns": null, "legend_box_size": 12, "logarithmic": true, "margin": 20, "margin_bottom": null, "margin_left": null, "margin_right": null, "margin_top": null, "max_scale": 16, "min_scale": 4, "missing_value_fill_truncation": "x", "no_data_text": "No data", "no_prefix": false, "order_min": null, "pretty_print": true, "print_labels": false, "print_values": false, "print_values_position": "center", "print_zeroes": true, "range": null, "rounded_bars": null, "secondary_range": null, "show_dots": true, "show_legend": true, "show_minor_x_labels": true, "show_minor_y_labels": true, "show_only_major_dots": false, "show_x_guides": false, "show_x_labels": true, "show_y_guides": true, "show_y_labels": true, "spacing": 10, "stack_from_top": false, "strict": false, "stroke": true, "stroke_style": {"width": 50}, "style": {"background": "rgba(249, 249, 249, 1)", "ci_colors": [], "colors": ["#F44336", "#3F51B5", "#009688", "#FFC107", "#FF5722", "#9C27B0", "#03A9F4", "#8BC34A", "#FF9800", "#E91E63", "#2196F3", "#4CAF50", "#FFEB3B", "#673AB7", "#00BCD4", "#CDDC39", "#9E9E9E", "#607D8B"], "dot_opacity": "1", "font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "foreground": "rgba(0, 0, 0, .87)", "foreground_strong": "rgba(0, 0, 0, 1)", "foreground_subtle": "rgba(0, 0, 0, .54)", "guide_stroke_color": "black", "guide_stroke_dasharray": "4,4", "label_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "label_font_size": 10, "legend_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "legend_font_size": 14, "major_guide_stroke_color": "black", "major_guide_stroke_dasharray": "6,6", "major_label_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "major_label_font_size": 10, "no_data_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "no_data_font_size": 64, "opacity": ".7", "opacity_hover": ".8", "plot_background": "rgba(255, 255, 255, 1)", "stroke_opacity": ".8", "stroke_opacity_hover": ".9", "stroke_width": "1", "stroke_width_hover": "4", "title_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "title_font_size": 16, "tooltip_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "tooltip_font_size": 14, "transition": "150ms", "value_background": "rgba(229, 229, 229, 1)", "value_colors": [], "value_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "value_font_size": 16, "value_label_font_family": "Consolas, \"Liberation Mono\", Menlo, Courier, monospace", "value_label_font_size": 10}, "title": null, "tooltip_border_radius": 0, "tooltip_fancy_mode": true, "truncate_label": null, "truncate_legend": null, "width": 800, "x_label_rotation": 270, "x_labels": null, "x_labels_major": null, "x_labels_major_count": null, "x_labels_major_every": null, "x_title": "payload size [B]", "xrange": null, "y_label_rotation": 0, "y_labels": null, "y_labels_major": null, "y_labels_major_count": null, "y_labels_major_every": null, "y_title": "messages delivery rate [1/s]", "zero": 0.2, "legends": ["20 consumers", "15 consumers", "10 consumers", "5 consumers", "1 consumers"]}</script>
+    <script type="text/javascript" xlink:href="https://kozea.github.io/pygal.js/2.0.x/pygal-tooltips.min.js"/>
+  </defs>
+  <title>Pygal</title>
+  <g class="graph xy-graph vertical">
+    <rect x="0" y="0" width="800" height="600" class="background"/>
+    <g transform="translate(80, 20)" class="plot">
+      <rect x="0" y="0" width="700.0" height="428.0" class="background"/>
+      <g class="axis y always_show">
+        <path d="M0.000000 428.000000 h700.000000" class="line"/>
+        <g class="logarithmic guides">
+          <path d="M0.000000 428.000000 h700.000000" class="guide line"/>
+          <text x="-5" y="431.5" class="">0.2</text>
+          <title>0.2</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 398.506852 h700.000000" class="guide line"/>
+          <text x="-5" y="402.00685206059325" class="">0.4</text>
+          <title>0.4</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 381.254466 h700.000000" class="guide line"/>
+          <text x="-5" y="384.7544664878189" class="">0.6</text>
+          <title>0.6</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 369.013704 h700.000000" class="guide line"/>
+          <text x="-5" y="372.51370412118655" class="">0.8</text>
+          <title>0.8</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 359.519031 h700.000000" class="guide line"/>
+          <text x="-5" y="363.0190311928222" class="">1</text>
+          <title>1</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 330.025883 h700.000000" class="guide line"/>
+          <text x="-5" y="333.5258832534155" class="">2</text>
+          <title>2</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 300.532735 h700.000000" class="guide line"/>
+          <text x="-5" y="304.03273531400873" class="">4</text>
+          <title>4</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 283.280350 h700.000000" class="guide line"/>
+          <text x="-5" y="286.7803497412343" class="">6</text>
+          <title>6</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 271.039587 h700.000000" class="guide line"/>
+          <text x="-5" y="274.539587374602" class="">8</text>
+          <title>8</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 261.544914 h700.000000" class="guide line"/>
+          <text x="-5" y="265.0449144462376" class="">10</text>
+          <title>10</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 232.051767 h700.000000" class="guide line"/>
+          <text x="-5" y="235.55176650683092" class="">20</text>
+          <title>20</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 202.558619 h700.000000" class="guide line"/>
+          <text x="-5" y="206.05861856742416" class="">40</text>
+          <title>40</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 185.306233 h700.000000" class="guide line"/>
+          <text x="-5" y="188.8062329946498" class="">60</text>
+          <title>60</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 173.065471 h700.000000" class="guide line"/>
+          <text x="-5" y="176.56547062801744" class="">80</text>
+          <title>80</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 163.570798 h700.000000" class="guide line"/>
+          <text x="-5" y="167.0707976996531" class="">100</text>
+          <title>100</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 134.077650 h700.000000" class="guide line"/>
+          <text x="-5" y="137.57764976024635" class="">200</text>
+          <title>200</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 104.584502 h700.000000" class="guide line"/>
+          <text x="-5" y="108.08450182083959" class="">400</text>
+          <title>400</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 87.332116 h700.000000" class="guide line"/>
+          <text x="-5" y="90.83211624806523" class="">600</text>
+          <title>600</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 75.091354 h700.000000" class="guide line"/>
+          <text x="-5" y="78.5913538814329" class="">800</text>
+          <title>800</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 65.596681 h700.000000" class="major guide line"/>
+          <text x="-5" y="69.09668095306859" class="major">1000</text>
+          <title>1000</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 36.103533 h700.000000" class="major guide line"/>
+          <text x="-5" y="39.60353301366183" class="major">2000</text>
+          <title>2000</title>
+        </g>
+        <g class="logarithmic guides">
+          <path d="M0.000000 6.610385 h700.000000" class="major guide line"/>
+          <text x="-5" y="10.11038507425502" class="major">4000</text>
+          <title>4000</title>
+        </g>
+      </g>
+      <g class="axis x">
+        <path d="M0.000000 0.000000 v428.000000" class="line"/>
+        <g class="guides">
+          <path d="M0.000000 0.000000 v428.000000" class="guide line"/>
+          <text x="0.0" y="443.0" class="backwards" transform="rotate(270 0.000000 443.000000)">1</text>
+          <title>1</title>
+        </g>
+        <g class="guides">
+          <path d="M52.680249 0.000000 v428.000000" class="guide line"/>
+          <text x="52.68024924119671" y="443.0" class="backwards" transform="rotate(270 52.680249 443.000000)">2</text>
+          <title>2</title>
+        </g>
+        <g class="guides">
+          <path d="M83.496220 0.000000 v428.000000" class="guide line"/>
+          <text x="83.49621957594093" y="443.0" class="backwards" transform="rotate(270 83.496220 443.000000)">3</text>
+          <title>3</title>
+        </g>
+        <g class="guides">
+          <path d="M105.360498 0.000000 v428.000000" class="guide line"/>
+          <text x="105.36049848239342" y="443.0" class="backwards" transform="rotate(270 105.360498 443.000000)">4</text>
+          <title>4</title>
+        </g>
+        <g class="guides">
+          <path d="M122.319751 0.000000 v428.000000" class="guide line"/>
+          <text x="122.3197507588033" y="443.0" class="backwards" transform="rotate(270 122.319751 443.000000)">5</text>
+          <title>5</title>
+        </g>
+        <g class="guides">
+          <path d="M136.176469 0.000000 v428.000000" class="guide line"/>
+          <text x="136.17646881713765" y="443.0" class="backwards" transform="rotate(270 136.176469 443.000000)">6</text>
+          <title>6</title>
+        </g>
+        <g class="guides">
+          <path d="M147.892157 0.000000 v428.000000" class="guide line"/>
+          <text x="147.89215700249494" y="443.0" class="backwards" transform="rotate(270 147.892157 443.000000)">7</text>
+          <title>7</title>
+        </g>
+        <g class="guides">
+          <path d="M158.040748 0.000000 v428.000000" class="guide line"/>
+          <text x="158.04074772359013" y="443.0" class="backwards" transform="rotate(270 158.040748 443.000000)">8</text>
+          <title>8</title>
+        </g>
+        <g class="guides">
+          <path d="M166.992439 0.000000 v428.000000" class="guide line"/>
+          <text x="166.99243915188185" y="443.0" class="backwards" transform="rotate(270 166.992439 443.000000)">9</text>
+          <title>9</title>
+        </g>
+        <g class="guides">
+          <path d="M175.000000 0.000000 v428.000000" class="guide line"/>
+          <text x="175.0" y="443.0" class="backwards" transform="rotate(270 175.000000 443.000000)">10</text>
+          <title>10</title>
+        </g>
+        <g class="guides">
+          <path d="M227.680249 0.000000 v428.000000" class="guide line"/>
+          <text x="227.68024924119672" y="443.0" class="backwards" transform="rotate(270 227.680249 443.000000)">20</text>
+          <title>20</title>
+        </g>
+        <g class="guides">
+          <path d="M258.496220 0.000000 v428.000000" class="guide line"/>
+          <text x="258.4962195759409" y="443.0" class="backwards" transform="rotate(270 258.496220 443.000000)">30</text>
+          <title>30</title>
+        </g>
+        <g class="guides">
+          <path d="M280.360498 0.000000 v428.000000" class="guide line"/>
+          <text x="280.36049848239344" y="443.0" class="backwards" transform="rotate(270 280.360498 443.000000)">40</text>
+          <title>40</title>
+        </g>
+        <g class="guides">
+          <path d="M297.319751 0.000000 v428.000000" class="guide line"/>
+          <text x="297.31975075880325" y="443.0" class="backwards" transform="rotate(270 297.319751 443.000000)">50</text>
+          <title>50</title>
+        </g>
+        <g class="guides">
+          <path d="M311.176469 0.000000 v428.000000" class="guide line"/>
+          <text x="311.1764688171376" y="443.0" class="backwards" transform="rotate(270 311.176469 443.000000)">60</text>
+          <title>60</title>
+        </g>
+        <g class="guides">
+          <path d="M322.892157 0.000000 v428.000000" class="guide line"/>
+          <text x="322.89215700249497" y="443.0" class="backwards" transform="rotate(270 322.892157 443.000000)">70</text>
+          <title>70</title>
+        </g>
+        <g class="guides">
+          <path d="M333.040748 0.000000 v428.000000" class="guide line"/>
+          <text x="333.04074772359013" y="443.0" class="backwards" transform="rotate(270 333.040748 443.000000)">80</text>
+          <title>80</title>
+        </g>
+        <g class="guides">
+          <path d="M341.992439 0.000000 v428.000000" class="guide line"/>
+          <text x="341.99243915188185" y="443.0" class="backwards" transform="rotate(270 341.992439 443.000000)">90</text>
+          <title>90</title>
+        </g>
+        <g class="guides">
+          <path d="M350.000000 0.000000 v428.000000" class="guide line"/>
+          <text x="350.0" y="443.0" class="backwards" transform="rotate(270 350.000000 443.000000)">100</text>
+          <title>100</title>
+        </g>
+        <g class="guides">
+          <path d="M402.680249 0.000000 v428.000000" class="guide line"/>
+          <text x="402.68024924119675" y="443.0" class="backwards" transform="rotate(270 402.680249 443.000000)">200</text>
+          <title>200</title>
+        </g>
+        <g class="guides">
+          <path d="M433.496220 0.000000 v428.000000" class="guide line"/>
+          <text x="433.4962195759409" y="443.0" class="backwards" transform="rotate(270 433.496220 443.000000)">300</text>
+          <title>300</title>
+        </g>
+        <g class="guides">
+          <path d="M455.360498 0.000000 v428.000000" class="guide line"/>
+          <text x="455.36049848239344" y="443.0" class="backwards" transform="rotate(270 455.360498 443.000000)">400</text>
+          <title>400</title>
+        </g>
+        <g class="guides">
+          <path d="M472.319751 0.000000 v428.000000" class="guide line"/>
+          <text x="472.31975075880325" y="443.0" class="backwards" transform="rotate(270 472.319751 443.000000)">500</text>
+          <title>500</title>
+        </g>
+        <g class="guides">
+          <path d="M486.176469 0.000000 v428.000000" class="guide line"/>
+          <text x="486.1764688171376" y="443.0" class="backwards" transform="rotate(270 486.176469 443.000000)">600</text>
+          <title>600</title>
+        </g>
+        <g class="guides">
+          <path d="M497.892157 0.000000 v428.000000" class="guide line"/>
+          <text x="497.89215700249497" y="443.0" class="backwards" transform="rotate(270 497.892157 443.000000)">700</text>
+          <title>700</title>
+        </g>
+        <g class="guides">
+          <path d="M508.040748 0.000000 v428.000000" class="guide line"/>
+          <text x="508.04074772359013" y="443.0" class="backwards" transform="rotate(270 508.040748 443.000000)">800</text>
+          <title>800</title>
+        </g>
+        <g class="guides">
+          <path d="M516.992439 0.000000 v428.000000" class="guide line"/>
+          <text x="516.9924391518819" y="443.0" class="backwards" transform="rotate(270 516.992439 443.000000)">900</text>
+          <title>900</title>
+        </g>
+        <g class="guides">
+          <path d="M525.000000 0.000000 v428.000000" class="guide line"/>
+          <text x="525.0" y="443.0" class="backwards" transform="rotate(270 525.000000 443.000000)">1000</text>
+          <title>1000</title>
+        </g>
+        <g class="guides">
+          <path d="M577.680249 0.000000 v428.000000" class="guide line"/>
+          <text x="577.6802492411967" y="443.0" class="backwards" transform="rotate(270 577.680249 443.000000)">2000</text>
+          <title>2000</title>
+        </g>
+        <g class="guides">
+          <path d="M608.496220 0.000000 v428.000000" class="guide line"/>
+          <text x="608.4962195759409" y="443.0" class="backwards" transform="rotate(270 608.496220 443.000000)">3000</text>
+          <title>3000</title>
+        </g>
+        <g class="guides">
+          <path d="M630.360498 0.000000 v428.000000" class="guide line"/>
+          <text x="630.3604984823935" y="443.0" class="backwards" transform="rotate(270 630.360498 443.000000)">4000</text>
+          <title>4000</title>
+        </g>
+        <g class="guides">
+          <path d="M647.319751 0.000000 v428.000000" class="guide line"/>
+          <text x="647.3197507588033" y="443.0" class="backwards" transform="rotate(270 647.319751 443.000000)">5000</text>
+          <title>5000</title>
+        </g>
+        <g class="guides">
+          <path d="M661.176469 0.000000 v428.000000" class="guide line"/>
+          <text x="661.1764688171377" y="443.0" class="backwards" transform="rotate(270 661.176469 443.000000)">6000</text>
+          <title>6000</title>
+        </g>
+        <g class="guides">
+          <path d="M672.892157 0.000000 v428.000000" class="guide line"/>
+          <text x="672.892157002495" y="443.0" class="backwards" transform="rotate(270 672.892157 443.000000)">7000</text>
+          <title>7000</title>
+        </g>
+        <g class="guides">
+          <path d="M683.040748 0.000000 v428.000000" class="guide line"/>
+          <text x="683.0407477235901" y="443.0" class="backwards" transform="rotate(270 683.040748 443.000000)">8000</text>
+          <title>8000</title>
+        </g>
+        <g class="guides">
+          <path d="M691.992439 0.000000 v428.000000" class="guide line"/>
+          <text x="691.9924391518819" y="443.0" class="backwards" transform="rotate(270 691.992439 443.000000)">9000</text>
+          <title>9000</title>
+        </g>
+        <g class="guides">
+          <path d="M700.000000 0.000000 v428.000000" class="guide line"/>
+          <text x="700.0" y="443.0" class="backwards" transform="rotate(270 700.000000 443.000000)">10000</text>
+          <title>10000</title>
+        </g>
+      </g>
+      <g class="series serie-0 color-0">
+        <path d="M700.000000 428.000000 L647.319751 398.506852 525.000000 336.941002 472.319751 308.718086 350.000000 252.736541 297.319751 234.911473 175.000000 183.365523 122.319751 172.589460 0.000000 165.440934" class="line reactive nofill"/>
+      </g>
+      <g class="series serie-1 color-1">
+        <path d="M700.000000 428.000000 L647.319751 398.506852 525.000000 327.949880 472.319751 291.897680 350.000000 251.374837 297.319751 227.420053 175.000000 171.653123 122.319751 155.179580 0.000000 136.778377" class="line reactive nofill"/>
+      </g>
+      <g class="series serie-2 color-2">
+        <path d="M700.000000 332.208393 L647.319751 292.775023 525.000000 230.382940 472.319751 195.606286 350.000000 162.271792 297.319751 159.670394 175.000000 81.583090 122.319751 88.445762 0.000000 63.646487" class="line reactive nofill"/>
+      </g>
+      <g class="series serie-3 color-3">
+        <path d="M700.000000 285.462860 L647.319751 255.598097 525.000000 191.231781 472.319751 161.131638 350.000000 94.843754 297.319751 73.086326 175.000000 43.748214 122.319751 36.742293 0.000000 31.626653" class="line reactive nofill"/>
+      </g>
+      <g class="series serie-4 color-4">
+        <path d="M700.000000 239.470437 L647.319751 210.231317 525.000000 148.055372 472.319751 118.517925 350.000000 59.054652 297.319751 37.047900 175.000000 10.297216 122.319751 4.739519 0.000000 0.000000" class="line reactive nofill"/>
+      </g>
+    </g>
+    <g class="titles">
+      <text x="430.0" y="514.0" class="title">payload size [B]</text>
+      <text x="0" y="260.0" class="title" transform="rotate(-90 0.000000 234.000000)">messages delivery rate [1/s]</text>
+    </g>
+    <g transform="translate(80, 20)" class="plot overlay">
+      <g class="series serie-0 color-0">
+        <g class="dots">
+          <circle cx="700.0" cy="428.0" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10000: 0.2</desc>
+          <desc class="x left top">700.0</desc>
+          <desc class="y left top">428.0</desc>
+        </g>
+        <g class="dots">
+          <circle cx="647.3197507588033" cy="398.50685206059325" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5000: 0.4</desc>
+          <desc class="x left top">647.3197507588033</desc>
+          <desc class="y left top">398.50685206059325</desc>
+        </g>
+        <g class="dots">
+          <circle cx="525.0" cy="336.9410016655827" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1000: 1.7</desc>
+          <desc class="x left top">525.0</desc>
+          <desc class="y left top">336.9410016655827</desc>
+        </g>
+        <g class="dots">
+          <circle cx="472.31975075880325" cy="308.71808591249453" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">500: 3.3</desc>
+          <desc class="x left top">472.31975075880325</desc>
+          <desc class="y left top">308.71808591249453</desc>
+        </g>
+        <g class="dots">
+          <circle cx="350.0" cy="252.73654056195934" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">100: 12.3</desc>
+          <desc class="x top">350.0</desc>
+          <desc class="y top">252.73654056195934</desc>
+        </g>
+        <g class="dots">
+          <circle cx="297.31975075880325" cy="234.91147315085158" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">50: 18.7</desc>
+          <desc class="x top">297.31975075880325</desc>
+          <desc class="y top">234.91147315085158</desc>
+        </g>
+        <g class="dots">
+          <circle cx="175.0" cy="183.36552315166657" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10: 62.8</desc>
+          <desc class="x ">175.0</desc>
+          <desc class="y ">183.36552315166657</desc>
+        </g>
+        <g class="dots">
+          <circle cx="122.3197507588033" cy="172.58945998990802" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5: 80.9</desc>
+          <desc class="x ">122.3197507588033</desc>
+          <desc class="y ">172.58945998990802</desc>
+        </g>
+        <g class="dots">
+          <circle cx="0.0" cy="165.44093373637065" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1: 95.7</desc>
+          <desc class="x ">0.0</desc>
+          <desc class="y ">165.44093373637065</desc>
+        </g>
+      </g>
+      <g class="series serie-1 color-1">
+        <g class="dots">
+          <circle cx="700.0" cy="428.0" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10000: 0.2</desc>
+          <desc class="x left top">700.0</desc>
+          <desc class="y left top">428.0</desc>
+        </g>
+        <g class="dots">
+          <circle cx="647.3197507588033" cy="398.50685206059325" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5000: 0.4</desc>
+          <desc class="x left top">647.3197507588033</desc>
+          <desc class="y left top">398.50685206059325</desc>
+        </g>
+        <g class="dots">
+          <circle cx="525.0" cy="327.94988039255907" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1000: 2.1</desc>
+          <desc class="x left top">525.0</desc>
+          <desc class="y left top">327.94988039255907</desc>
+        </g>
+        <g class="dots">
+          <circle cx="472.31975075880325" cy="291.8976798700736" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">500: 4.9</desc>
+          <desc class="x left top">472.31975075880325</desc>
+          <desc class="y left top">291.8976798700736</desc>
+        </g>
+        <g class="dots">
+          <circle cx="350.0" cy="251.37483657056885" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">100: 12.7</desc>
+          <desc class="x top">350.0</desc>
+          <desc class="y top">251.37483657056885</desc>
+        </g>
+        <g class="dots">
+          <circle cx="297.31975075880325" cy="227.420053130554" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">50: 22.3</desc>
+          <desc class="x top">297.31975075880325</desc>
+          <desc class="y top">227.420053130554</desc>
+        </g>
+        <g class="dots">
+          <circle cx="175.0" cy="171.6531225377019" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10: 82.7</desc>
+          <desc class="x ">175.0</desc>
+          <desc class="y ">171.6531225377019</desc>
+        </g>
+        <g class="dots">
+          <circle cx="122.3197507588033" cy="155.1795802770285" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5: 121.8</desc>
+          <desc class="x ">122.3197507588033</desc>
+          <desc class="y ">155.1795802770285</desc>
+        </g>
+        <g class="dots">
+          <circle cx="0.0" cy="136.77837712782946" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1: 187.7</desc>
+          <desc class="x ">0.0</desc>
+          <desc class="y ">136.77837712782946</desc>
+        </g>
+      </g>
+      <g class="series serie-2 color-2">
+        <g class="dots">
+          <circle cx="700.0" cy="332.2083933495389" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10000: 1.9</desc>
+          <desc class="x left top">700.0</desc>
+          <desc class="y left top">332.2083933495389</desc>
+        </g>
+        <g class="dots">
+          <circle cx="647.3197507588033" cy="292.7750226695987" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5000: 4.8</desc>
+          <desc class="x left top">647.3197507588033</desc>
+          <desc class="y left top">292.7750226695987</desc>
+        </g>
+        <g class="dots">
+          <circle cx="525.0" cy="230.38294013378803" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1000: 20.8</desc>
+          <desc class="x left top">525.0</desc>
+          <desc class="y left top">230.38294013378803</desc>
+        </g>
+        <g class="dots">
+          <circle cx="472.31975075880325" cy="195.60628551829893" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">500: 47.1</desc>
+          <desc class="x left">472.31975075880325</desc>
+          <desc class="y left">195.60628551829893</desc>
+        </g>
+        <g class="dots">
+          <circle cx="350.0" cy="162.27179167926192" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">100: 103.1</desc>
+          <desc class="x ">350.0</desc>
+          <desc class="y ">162.27179167926192</desc>
+        </g>
+        <g class="dots">
+          <circle cx="297.31975075880325" cy="159.6703938197764" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">50: 109.6</desc>
+          <desc class="x ">297.31975075880325</desc>
+          <desc class="y ">159.6703938197764</desc>
+        </g>
+        <g class="dots">
+          <circle cx="175.0" cy="81.58308951411391" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10: 686.8</desc>
+          <desc class="x ">175.0</desc>
+          <desc class="y ">81.58308951411391</desc>
+        </g>
+        <g class="dots">
+          <circle cx="122.3197507588033" cy="88.44576205879264" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5: 584.5</desc>
+          <desc class="x ">122.3197507588033</desc>
+          <desc class="y ">88.44576205879264</desc>
+        </g>
+        <g class="dots">
+          <circle cx="0.0" cy="63.64648658354713" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1: 1046.9</desc>
+          <desc class="x ">0.0</desc>
+          <desc class="y ">63.64648658354713</desc>
+        </g>
+      </g>
+      <g class="series serie-3 color-3">
+        <g class="dots">
+          <circle cx="700.0" cy="285.46285983735777" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10000: 5.7</desc>
+          <desc class="x left top">700.0</desc>
+          <desc class="y left top">285.46285983735777</desc>
+        </g>
+        <g class="dots">
+          <circle cx="647.3197507588033" cy="255.59809714916733" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5000: 11.5</desc>
+          <desc class="x left top">647.3197507588033</desc>
+          <desc class="y left top">255.59809714916733</desc>
+        </g>
+        <g class="dots">
+          <circle cx="525.0" cy="191.23178079951396" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1000: 52.2</desc>
+          <desc class="x left">525.0</desc>
+          <desc class="y left">191.23178079951396</desc>
+        </g>
+        <g class="dots">
+          <circle cx="472.31975075880325" cy="161.13163799756404" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">500: 105.9</desc>
+          <desc class="x left">472.31975075880325</desc>
+          <desc class="y left">161.13163799756404</desc>
+        </g>
+        <g class="dots">
+          <circle cx="350.0" cy="94.8437540357433" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">100: 502.9</desc>
+          <desc class="x ">350.0</desc>
+          <desc class="y ">94.8437540357433</desc>
+        </g>
+        <g class="dots">
+          <circle cx="297.31975075880325" cy="73.08632621346771" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">50: 838.6</desc>
+          <desc class="x ">297.31975075880325</desc>
+          <desc class="y ">73.08632621346771</desc>
+        </g>
+        <g class="dots">
+          <circle cx="175.0" cy="43.74821393909474" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10: 1671.1</desc>
+          <desc class="x ">175.0</desc>
+          <desc class="y ">43.74821393909474</desc>
+        </g>
+        <g class="dots">
+          <circle cx="122.3197507588033" cy="36.74229299424843" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5: 1970.2</desc>
+          <desc class="x ">122.3197507588033</desc>
+          <desc class="y ">36.74229299424843</desc>
+        </g>
+        <g class="dots">
+          <circle cx="0.0" cy="31.62665343343508" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1: 2221.9</desc>
+          <desc class="x ">0.0</desc>
+          <desc class="y ">31.62665343343508</desc>
+        </g>
+      </g>
+      <g class="series serie-4 color-4">
+        <g class="dots">
+          <circle cx="700.0" cy="239.47043657433886" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10000: 16.8</desc>
+          <desc class="x left top">700.0</desc>
+          <desc class="y left top">239.47043657433886</desc>
+        </g>
+        <g class="dots">
+          <circle cx="647.3197507588033" cy="210.23131696123025" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5000: 33.4</desc>
+          <desc class="x left">647.3197507588033</desc>
+          <desc class="y left">210.23131696123025</desc>
+        </g>
+        <g class="dots">
+          <circle cx="525.0" cy="148.055372410833" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1000: 144</desc>
+          <desc class="x left">525.0</desc>
+          <desc class="y left">148.055372410833</desc>
+        </g>
+        <g class="dots">
+          <circle cx="472.31975075880325" cy="118.51792502101938" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">500: 288.3</desc>
+          <desc class="x left">472.31975075880325</desc>
+          <desc class="y left">118.51792502101938</desc>
+        </g>
+        <g class="dots">
+          <circle cx="350.0" cy="59.05465162217621" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">100: 1166.2</desc>
+          <desc class="x ">350.0</desc>
+          <desc class="y ">59.05465162217621</desc>
+        </g>
+        <g class="dots">
+          <circle cx="297.31975075880325" cy="37.047899899854485" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">50: 1956.1</desc>
+          <desc class="x ">297.31975075880325</desc>
+          <desc class="y ">37.047899899854485</desc>
+        </g>
+        <g class="dots">
+          <circle cx="175.0" cy="10.297216174571986" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">10: 3668</desc>
+          <desc class="x ">175.0</desc>
+          <desc class="y ">10.297216174571986</desc>
+        </g>
+        <g class="dots">
+          <circle cx="122.3197507588033" cy="4.739519317841371" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">5: 4179.8</desc>
+          <desc class="x ">122.3197507588033</desc>
+          <desc class="y ">4.739519317841371</desc>
+        </g>
+        <g class="dots">
+          <circle cx="0.0" cy="0.0" r="2.5" class="dot reactive tooltip-trigger"/>
+          <desc class="value">1: 4672.3</desc>
+          <desc class="x ">0.0</desc>
+          <desc class="y ">0.0</desc>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(80, 20)" class="plot text-overlay">
+      <g class="series serie-0 color-0"/>
+      <g class="series serie-1 color-1"/>
+      <g class="series serie-2 color-2"/>
+      <g class="series serie-3 color-3"/>
+      <g class="series serie-4 color-4"/>
+    </g>
+    <g transform="translate(80, 20)" class="plot tooltip-overlay">
+      <g transform="translate(0 0)" style="opacity: 0" class="tooltip">
+        <rect rx="0" ry="0" width="0" height="0" class="tooltip-box"/>
+        <g class="text"/>
+      </g>
+    </g>
+    <g transform="translate(90, 534)" class="legends">
+      <g id="activate-serie-0" class="legend reactive activate-serie">
+        <rect x="0.0" y="1.0" width="12" height="12" class="color-0 reactive"/>
+        <text x="17.0" y="11.2">20 consumers</text>
+      </g>
+      <g id="activate-serie-1" class="legend reactive activate-serie">
+        <rect x="233.33333333333334" y="1.0" width="12" height="12" class="color-1 reactive"/>
+        <text x="250.33333333333334" y="11.2">15 consumers</text>
+      </g>
+      <g id="activate-serie-2" class="legend reactive activate-serie">
+        <rect x="466.6666666666667" y="1.0" width="12" height="12" class="color-2 reactive"/>
+        <text x="483.6666666666667" y="11.2">10 consumers</text>
+      </g>
+      <g id="activate-serie-3" class="legend reactive activate-serie">
+        <rect x="0.0" y="22.0" width="12" height="12" class="color-3 reactive"/>
+        <text x="17.0" y="32.2">5 consumers</text>
+      </g>
+      <g id="activate-serie-4" class="legend reactive activate-serie">
+        <rect x="233.33333333333334" y="22.0" width="12" height="12" class="color-4 reactive"/>
+        <text x="250.33333333333334" y="32.2">1 consumers</text>
+      </g>
+    </g>
+  </g>
+</svg>
