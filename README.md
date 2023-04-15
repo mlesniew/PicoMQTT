@@ -7,6 +7,7 @@ Features:
 * MQTT 3.1.1 implementation
 * Allows handling and sending arbitrary sized messages
 * High performance -- the broker can deliver thousands of messages per second -- [see benchmarks](#benchmarks)
+* Easy integration with the [ArduinoJson](https://arduinojson.org/) library to publish and consume JSON messages -- [see examples](#json)
 * Low memory usage
 
 Limitations:
@@ -212,6 +213,43 @@ mqtt.subscribe("picomqtt/advanced", [](const char * topic, PicoMQTT::IncomingPac
 
 * When consuming or producing a message using the advanced API, don't call other MQTT methods.  Don't try to publish multiple messages at a time or publish a message while consuming another.
 * Even with this API, the topic size is still limited.  The limit can be increased by overriding values from [config.h](src/PicoMQTT/config.h).
+
+## Json
+
+It's easy to publish and subscribe to JSON messages by integrating with [ArduinoJson](https://arduinojson.org/).  Of course, you can always simply use `serializeJson` and `deserializeJson` with strings, but it's much more efficient to use the advanced API for this.  Check the examples below or try the [arduinojson.ino](examples/arduinojson/arduinojson.ino) example.
+
+### Subscribing
+
+```
+mqtt.subscribe("picomqtt/json/#", [](const char * topic, Stream & stream) {
+    // declare a StaticJsonDocument or DynamicJsonDocument as usual
+    StaticJsonDocument<1024> json;
+
+    // Deserialize straight from the Stream object
+    if (deserializeJson(json, stream)) {
+        // don't forget to check for errors
+        Serial.println("Json parsing failed.");
+        return;
+    }
+
+    // work with the object as usual
+    int value = json["foo"].as<int>();
+});
+```
+
+### Publishing
+
+```
+// declare a StaticJsonDocument or DynamicJsonDocument and add data as usual
+StaticJsonDocument<1024> json;
+json["foo"] = "bar";
+json["millis"] = millis();
+
+// publish using begin_publish()/send() API
+auto publish = mqtt.begin_publish(topic, measureJson(json));
+serializeJson(json, publish);
+publish.send();
+```
 
 ## Benchmarks
 

@@ -41,6 +41,7 @@ jobs:
           for example in examples/*; do
             cd "$example"
             platformio init --board ${{ matrix.board }}
+            grep -q ArduinoJson *.ino && echo "lib_deps = bblanchon/ArduinoJson" >> platformio.ini
             mv *.ino src/
             ln -s ../../../ lib/PicoMQTT
             pio run
