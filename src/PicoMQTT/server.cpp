@@ -126,7 +126,7 @@ void BasicServer::Client::on_message(const char * topic, IncomingPacket & packet
     TRACE_FUNCTION
 
     const size_t payload_size = packet.get_remaining_size();
-    auto publish = server.publish(topic, payload_size);
+    auto publish = server.begin_publish(topic, payload_size);
 
     // Always notify the server about the message
     {
@@ -225,16 +225,16 @@ Server::SubscriptionId BasicServer::Client::get_subscription(const char * topic)
     return 0;
 }
 
-BasicServer::Client::SubscriptionId BasicServer::Client::subscribe(const char * topic_filter) {
+BasicServer::Client::SubscriptionId BasicServer::Client::subscribe(const String & topic_filter) {
     TRACE_FUNCTION
-    const Subscription subscription(topic_filter);
+    const Subscription subscription(topic_filter.c_str());
     subscriptions.insert(subscription);
     return subscription.id;
 }
 
-void BasicServer::Client::unsubscribe(const char * topic_filter) {
+void BasicServer::Client::unsubscribe(const String & topic_filter) {
     TRACE_FUNCTION
-    subscriptions.erase(topic_filter);
+    subscriptions.erase(topic_filter.c_str());
 }
 
 void BasicServer::Client::handle_packet(IncomingPacket & packet) {
@@ -348,8 +348,8 @@ PrintMux BasicServer::get_subscribed(const char * topic) {
     return ret;
 }
 
-Publisher::Publish BasicServer::publish(const char * topic, const size_t payload_size,
-                                        uint8_t, bool, uint16_t) {
+Publisher::Publish BasicServer::begin_publish(const char * topic, const size_t payload_size,
+        uint8_t, bool, uint16_t) {
     TRACE_FUNCTION
     return Publish(*this, get_subscribed(topic), topic, payload_size);
 }

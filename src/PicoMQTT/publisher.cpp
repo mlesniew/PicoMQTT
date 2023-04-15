@@ -53,38 +53,4 @@ bool Publisher::Publish::send() {
     return OutgoingPacket::send() && publisher.on_publish_complete(*this);
 }
 
-bool Publisher::publish(const char * topic, const void * payload, const size_t payload_size,
-                        uint8_t qos, bool retain, uint16_t message_id) {
-    TRACE_FUNCTION
-    auto packet = publish(topic, payload_size, qos, retain, message_id);
-    packet.write((const uint8_t *) payload, payload_size);
-    return packet.send();
-}
-
-bool Publisher::publish(const char * topic, const char * payload,
-                        uint8_t qos, bool retain, uint16_t message_id) {
-    TRACE_FUNCTION
-    return publish(topic, payload, strlen(payload), qos, retain, message_id);
-}
-
-bool Publisher::publish(const String & topic, const String & payload,
-                        uint8_t qos, bool retain, uint16_t message_id) {
-    TRACE_FUNCTION
-    return publish(topic.c_str(), payload.c_str(), qos, retain, message_id);
-}
-
-bool Publisher::publish_P(const char * topic, PGM_P payload, const size_t payload_size,
-                          uint8_t qos, bool retain, uint16_t message_id) {
-    TRACE_FUNCTION;
-    auto packet = publish(topic, payload_size, qos, retain, message_id);
-    packet.write_P(payload, payload_size);
-    return packet.send();
-}
-
-bool Publisher::publish_P(const char * topic, PGM_P payload,
-                          uint8_t qos, bool retain, uint16_t message_id) {
-    TRACE_FUNCTION
-    return publish_P(topic, payload, strlen_P(payload), qos, retain, message_id);
-}
-
 }

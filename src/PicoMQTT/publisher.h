@@ -1,7 +1,10 @@
 #pragma once
 
+#include <cstring>
+
 #include <Arduino.h>
 
+#include "debug.h"
 #include "outgoing_packet.h"
 #include "print_mux.h"
 
@@ -35,26 +38,53 @@ class Publisher {
                 Publisher & publisher;
         };
 
-        virtual Publish publish(const char * topic, const size_t payload_size,
-                                uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) = 0;
+        virtual Publish begin_publish(const char * topic, const size_t payload_size,
+                                      uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) = 0;
 
-        bool publish(const char * topic, const void * payload, const size_t payload_size,
-                     uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
+        Publish begin_publish(const String & topic, const size_t payload_size,
+                              uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) {
+            return begin_publish(topic.c_str(), payload_size, qos, retain, message_id);
+        }
 
-        bool publish(const char * topic, const char * payload,
-                     uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
+        template <typename TopicStringType>
+        bool publish(TopicStringType topic, const void * payload, const size_t payload_size,
+                     uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) {
+            TRACE_FUNCTION
+            auto packet = begin_publish(get_c_str(topic), payload_size, qos, retain, message_id);
+            packet.write((const uint8_t *) payload, payload_size);
+            return packet.send();
+        }
 
-        bool publish(const String & topic, const String & payload,
-                     uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
+        template <typename TopicStringType>
+        bool publish_P(TopicStringType topic, PGM_P payload, const size_t payload_size,
+                       uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) {
+            TRACE_FUNCTION;
+            auto packet = begin_publish(get_c_str(topic), payload_size, qos, retain, message_id);
+            packet.write_P(payload, payload_size);
+            return packet.send();
+        }
 
-        bool publish_P(const char * topic, PGM_P payload, const size_t payload_size,
-                       uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
+        template <typename TopicStringType, typename PayloadStringType>
+        bool publish(TopicStringType topic, PayloadStringType payload,
+                     uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) {
+            return publish(topic, (const void *) get_c_str(payload), get_c_str_len(payload),
+                           qos, retain, message_id);
+        }
 
-        bool publish_P(const char * topic, PGM_P payload,
-                       uint8_t qos = 0, bool retain = false, uint16_t message_id = 0);
+        template <typename TopicStringType>
+        bool publish_P(TopicStringType topic, PGM_P payload,
+                       uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) {
+            return publish_P(topic, payload, strlen_P(payload),
+                             qos, retain, message_id);
+        }
 
     protected:
         virtual bool on_publish_complete(const Publish & publish) { return true; }
+
+        static const char * get_c_str(const char * string) { return string; }
+        static const char * get_c_str(const String & string) { return string.c_str(); }
+        static size_t get_c_str_len(const char * string) { return strlen(string); }
+        static size_t get_c_str_len(const String & string) { return string.length(); }
 };
 
 }

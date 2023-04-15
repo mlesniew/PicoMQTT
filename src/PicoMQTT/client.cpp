@@ -124,8 +124,8 @@ void BasicClient::loop() {
     Connection::loop();
 }
 
-Publisher::Publish BasicClient::publish(const char * topic, const size_t payload_size,
-                                        uint8_t qos, bool retain, uint16_t message_id) {
+Publisher::Publish BasicClient::begin_publish(const char * topic, const size_t payload_size,
+        uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION
     return Publish(
                *this, client,
@@ -212,13 +212,13 @@ Client::Client(const char * host, uint16_t port, const char * id, const char * u
     TRACE_FUNCTION
 }
 
-Client::SubscriptionId Client::subscribe(const char * topic_filter, MessageCallback callback) {
+Client::SubscriptionId Client::subscribe(const String & topic_filter, MessageCallback callback) {
     TRACE_FUNCTION
     BasicClient::subscribe(topic_filter);
     return SubscribedMessageListener::subscribe(topic_filter, callback);
 }
 
-void Client::unsubscribe(const char * topic_filter) {
+void Client::unsubscribe(const String & topic_filter) {
     TRACE_FUNCTION
     BasicClient::unsubscribe(topic_filter);
     SubscribedMessageListener::unsubscribe(topic_filter);

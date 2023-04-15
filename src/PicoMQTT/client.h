@@ -26,9 +26,9 @@ class BasicClient: public PicoMQTTInterface, public Connection, public Publisher
             const bool cleanSession = true,
             ConnectReturnCode * connect_return_code = nullptr);
 
-        using Publisher::publish;
-        virtual Publish publish(const char * topic, const size_t payload_size,
-                                uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
+        using Publisher::begin_publish;
+        virtual Publish begin_publish(const char * topic, const size_t payload_size,
+                                      uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
 
         bool subscribe(const String & topic, uint8_t qos = 0, uint8_t * qos_granted = nullptr);
         bool unsubscribe(const String & topic);
@@ -47,8 +47,8 @@ class Client: public BasicClient, public SubscribedMessageListener {
                const char * password = nullptr);
 
         using SubscribedMessageListener::subscribe;
-        virtual SubscriptionId subscribe(const char * topic_filter, MessageCallback callback) override;
-        virtual void unsubscribe(const char * topic_filter) override;
+        virtual SubscriptionId subscribe(const String & topic_filter, MessageCallback callback) override;
+        virtual void unsubscribe(const String & topic_filter) override;
 
         virtual void loop() override;
 

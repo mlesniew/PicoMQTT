@@ -171,7 +171,7 @@ memory.
 ### Publishing
 
 ```
-auto publish = mqtt.publish(
+auto publish = mqtt.begin_publish(
         "picomqtt/advanced",  // topic
         1000000               // payload size
         );
