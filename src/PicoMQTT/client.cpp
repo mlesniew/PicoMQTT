@@ -128,7 +128,8 @@ Publisher::Publish BasicClient::begin_publish(const char * topic, const size_t p
         uint8_t qos, bool retain, uint16_t message_id) {
     TRACE_FUNCTION
     return Publish(
-               *this, client,
+               *this,
+               client.status() ? client : PrintMux(),
                topic, payload_size,
                (qos >= 1) ? 1 : 0,
                retain,
@@ -207,8 +208,10 @@ bool BasicClient::unsubscribe(const String & topic) {
     return client.connected();
 }
 
-Client::Client(const char * host, uint16_t port, const char * id, const char * user, const char * password)
-    : host(host), port(port), client_id(id), username(user), password(password) {
+Client::Client(const char * host, uint16_t port, const char * id, const char * user, const char * password,
+               unsigned long reconnect_interval_millis)
+    : host(host), port(port), client_id(id), username(user), password(password),
+      reconnect_interval_millis(reconnect_interval_millis), last_reconnect_attempt(millis() - reconnect_interval_millis) {
     TRACE_FUNCTION
 }
 
@@ -234,6 +237,12 @@ void Client::loop() {
         if (host.isEmpty() || !port) {
             return;
         }
+
+        if (millis() - last_reconnect_attempt < reconnect_interval_millis) {
+            return;
+        }
+
+        last_reconnect_attempt = millis();
 
         if (!connect(host.c_str(), port,
                      client_id.isEmpty() ? "" : client_id.c_str(),

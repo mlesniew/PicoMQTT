@@ -25,7 +25,7 @@ int ClientWrapper::available_wait(unsigned long timeout) {
         if (ret > 0) {
             return ret;
         }
-        if (!connected()) {
+        if (!status()) {
             // A disconnected client might still have unread data waiting in buffers.  Don't move this check earlier.
             return 0;
         }
@@ -48,7 +48,7 @@ int ClientWrapper::read(uint8_t * buf, size_t size) {
 
         if (elapsed_millis > socket_timeout_millis) {
             // timeout
-            stop();
+            abort();
             break;
         }
 
@@ -57,7 +57,7 @@ int ClientWrapper::read(uint8_t * buf, size_t size) {
         const int available_size = available_wait(remaining_millis);
         if (available_size <= 0) {
             // timeout
-            stop();
+            abort();
             break;
         }
 
@@ -66,7 +66,7 @@ int ClientWrapper::read(uint8_t * buf, size_t size) {
         const int bytes_read = WiFiClient::read(buf + ret, chunk_size);
         if (bytes_read <= 0) {
             // connection error
-            stop();
+            abort();
             break;
         }
 
@@ -97,11 +97,11 @@ size_t ClientWrapper::write(const uint8_t * buffer, size_t size) {
     TRACE_FUNCTION
     size_t ret = 0;
 
-    while (connected() && ret < size) {
+    while (status() && ret < size) {
         const int bytes_written = WiFiClient::write(buffer + ret, size - ret);
         if (bytes_written <= 0) {
             // connection error
-            stop();
+            abort();
             return 0;
         }
 

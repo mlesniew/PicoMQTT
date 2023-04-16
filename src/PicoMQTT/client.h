@@ -44,7 +44,7 @@ class BasicClient: public PicoMQTTInterface, public Connection, public Publisher
 class Client: public BasicClient, public SubscribedMessageListener {
     public:
         Client(const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr, const char * user = nullptr,
-               const char * password = nullptr);
+               const char * password = nullptr, unsigned long reconnect_interval_millis = 30 * 1000);
 
         using SubscribedMessageListener::subscribe;
         virtual SubscriptionId subscribe(const String & topic_filter, MessageCallback callback) override;
@@ -59,7 +59,10 @@ class Client: public BasicClient, public SubscribedMessageListener {
         String username;
         String password;
 
+        unsigned long reconnect_interval_millis;
+
     protected:
+        unsigned long last_reconnect_attempt;
         virtual void on_message(const char * topic, IncomingPacket & packet) override;
 };
 

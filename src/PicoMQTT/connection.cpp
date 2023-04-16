@@ -29,7 +29,7 @@ OutgoingPacket Connection::build_packet(Packet::Type type, uint8_t flags, size_t
 
 void Connection::on_timeout() {
     TRACE_FUNCTION
-    client.stop();
+    client.abort();
 }
 
 void Connection::on_protocol_violation() {
