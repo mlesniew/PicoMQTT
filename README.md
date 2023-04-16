@@ -18,10 +18,16 @@ Limitations:
 
 ## Installation
 
-Once you have the ESP board and toolchain set up, you can install the library by adding it to your Arduino libraries folder.
+The library can be installed using the Library Manager in Arduino IDE or by manually adding it to your Arduino libraries folder.
 
-If you're using PlatformIO, clone this repository into your project's `lib/` subdirectory.
-
+PlatformIO users can add it to their project by specifying `mlesniew/PicoMQTT` as a dependency in `platformio.ini`, e.g.:
+```
+[env:foobar]
+platform = espressif8266
+framework = arduino
+board = ...
+lib_deps = mlesniew/PicoMQTT
+```
 
 ## Quickstart
 
