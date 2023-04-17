@@ -2,10 +2,17 @@
 
 This is a lightweight and easy to use MQTT library for ESP8266 and ESP32 devices.
 
+![Build](https://github.com/mlesniew/PicoMQTT/actions/workflows/ci.yml/badge.svg) ![License](https://img.shields.io/github/license/mlesniew/PicoMQTT) 
+
+[![arduino-library-badge](https://www.ardu-badge.com/badge/PicoMQTT.svg?)](https://www.ardu-badge.com/PicoMQTT) [![PlatformIO library](https://badges.registry.platformio.org/packages/mlesniew/library/PicoMQTT.svg)](https://registry.platformio.org/libraries/mlesniew/PicoMQTT)
+
+[![ESP8266](https://img.shields.io/badge/ESP-8266-000000.svg?longCache=true&style=flat&colorA=CC101F)](https://www.espressif.com/en/products/socs/esp8266) [![ESP32](https://img.shields.io/badge/ESP-32-000000.svg?longCache=true&style=flat&colorA=CC101F)](https://www.espressif.com/en/products/socs/esp32)
+
 Features:
 * Client and broker mode supported
-* MQTT 3.1.1 implementation
-* Allows handling and sending arbitrary sized messages
+* Intuitive API
+* [MQTT 3.1.1](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html) implementation
+* Publishing and consuming of [arbitrary sized messages](#arbitrary-sized-messages)
 * High performance -- the broker can deliver thousands of messages per second -- [see benchmarks](#benchmarks)
 * Easy integration with the [ArduinoJson](https://arduinojson.org/) library to publish and consume JSON messages -- [see examples](#json)
 * Low memory usage
@@ -16,18 +23,10 @@ Limitations:
 * Currently only ESP8266 and ESP32 boards are supported
 
 
-## Installation
+## Installation instructions
 
-The library can be installed using the Library Manager in Arduino IDE or by manually adding it to your Arduino libraries folder.
-
-PlatformIO users can add it to their project by specifying `mlesniew/PicoMQTT` as a dependency in `platformio.ini`, e.g.:
-```
-[env:foobar]
-platform = espressif8266
-framework = arduino
-board = ...
-lib_deps = mlesniew/PicoMQTT
-```
+* [Arduino IDE](https://www.ardu-badge.com/PicoMQTT)
+* [PlatformIO](https://registry.platformio.org/libraries/mlesniew/PicoMQTT/installation)
 
 ## Quickstart
 
