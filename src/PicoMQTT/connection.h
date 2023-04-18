@@ -3,7 +3,6 @@
 #include <functional>
 
 #include <Arduino.h>
-#include "Client.h"
 
 #include "client_wrapper.h"
 #include "incoming_packet.h"
