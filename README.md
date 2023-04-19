@@ -28,6 +28,11 @@ Limitations:
 * [Arduino IDE](https://www.ardu-badge.com/PicoMQTT)
 * [PlatformIO](https://registry.platformio.org/libraries/mlesniew/PicoMQTT/installation)
 
+Additionally, PicoMQTT requires a recent version of the board core:
+** For ESP8266 core version 3.1 or later
+** For ESP32 core version 2.0.7 or later
+
+
 ## Quickstart
 
 To get started, try compiling and running the code below or explore [examples](examples).
