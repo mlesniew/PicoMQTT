@@ -21,7 +21,7 @@ class BasicClient: public PicoMQTTInterface, public Connection, public Publisher
         bool connect(
             const char * host, uint16_t port = 1883,
             const char * id = "", const char * user = nullptr, const char * pass = nullptr,
-            const char * willTopic = nullptr, const char * will_message = nullptr,
+            const char * will_topic = nullptr, const char * will_message = nullptr,
             const size_t will_message_length = 0, uint8_t willQos = 0, bool willRetain = false,
             const bool cleanSession = true,
             ConnectReturnCode * connect_return_code = nullptr);
@@ -58,6 +58,13 @@ class Client: public BasicClient, public SubscribedMessageListener {
         String client_id;
         String username;
         String password;
+
+        struct {
+            String topic;
+            String payload;
+            uint8_t qos;
+            bool retain;
+        } will;
 
         unsigned long reconnect_interval_millis;
 

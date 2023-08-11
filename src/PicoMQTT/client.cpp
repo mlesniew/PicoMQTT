@@ -211,7 +211,9 @@ bool BasicClient::unsubscribe(const String & topic) {
 Client::Client(const char * host, uint16_t port, const char * id, const char * user, const char * password,
                unsigned long reconnect_interval_millis)
     : host(host), port(port), client_id(id), username(user), password(password),
-      reconnect_interval_millis(reconnect_interval_millis), last_reconnect_attempt(millis() - reconnect_interval_millis) {
+      will({"", "", 0, false}),
+      reconnect_interval_millis(reconnect_interval_millis),
+      last_reconnect_attempt(millis() - reconnect_interval_millis) {
     TRACE_FUNCTION
 }
 
@@ -247,7 +249,11 @@ void Client::loop() {
         if (!connect(host.c_str(), port,
                      client_id.isEmpty() ? "" : client_id.c_str(),
                      username.isEmpty() ? nullptr : username.c_str(),
-                     password.isEmpty() ? nullptr : password.c_str())) {
+                     password.isEmpty() ? nullptr : password.c_str(),
+                     will.topic.isEmpty() ? nullptr : will.topic.c_str(),
+                     will.payload.isEmpty() ? nullptr : will.payload.c_str(),
+                     will.payload.isEmpty() ? 0 : will.payload.length(),
+                     will.qos, will.retain)) {
             return;
         }
 
