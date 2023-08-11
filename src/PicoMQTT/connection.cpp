@@ -30,11 +30,12 @@ OutgoingPacket Connection::build_packet(Packet::Type type, uint8_t flags, size_t
 void Connection::on_timeout() {
     TRACE_FUNCTION
     client.abort();
+    on_disconnect();
 }
 
 void Connection::on_protocol_violation() {
     TRACE_FUNCTION
-    client.stop();
+    on_disconnect();
 }
 
 void Connection::on_disconnect() {

@@ -254,9 +254,25 @@ void Client::loop() {
         for (const auto & kv : subscriptions) {
             BasicClient::subscribe(kv.first.c_str());
         }
+
+        on_connect();
     }
 
     BasicClient::loop();
+}
+
+void Client::on_connect() {
+    TRACE_FUNCTION
+    BasicClient::on_connect();
+    if (connected_callback)
+        connected_callback();
+}
+
+void Client::on_disconnect() {
+    TRACE_FUNCTION
+    BasicClient::on_disconnect();
+    if (disconnected_callback)
+        connected_callback();
 }
 
 }

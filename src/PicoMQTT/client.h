@@ -35,7 +35,7 @@ class BasicClient: public PicoMQTTInterface, public Connection, public Publisher
 
         void loop() override;
 
-        virtual void on_connected() {}
+        virtual void on_connect() {}
 
     private:
         virtual bool on_publish_complete(const Publish & publish) override;
@@ -60,6 +60,12 @@ class Client: public BasicClient, public SubscribedMessageListener {
         String password;
 
         unsigned long reconnect_interval_millis;
+
+        std::function<void()> connected_callback;
+        std::function<void()> disconnected_callback;
+
+        virtual void on_connect() override;
+        virtual void on_disconnect() override;
 
     protected:
         unsigned long last_reconnect_attempt;
