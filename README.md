@@ -173,6 +173,70 @@ the same device will not trigger the callback.
 * Try to return from message handlers quickly.  Don't call functions which may block (like reading from serial or network connections), don't use the `delay()` function.
 * More examples available [here](examples/advanced_consume/advanced_consume.ino)
 
+## Last Will Testament messages
+
+Clients can be configured with a will message (aka LWT).  This can be configured by changing elements of the client's `will`.structure:
+
+```
+#include <PicoMQTT.h>
+
+PicoMQTT::Client mqtt("broker.hivemq.com");  // or PicoMQTT::Server mqtt;
+
+void setup() {
+    /* ... */
+
+    mqtt.will.topic = "picomqtt/lwt";
+    mqtt.will.payload = "bye bye";
+    mqtt.will.qos = 1;
+    mqtt.will.retain = true;
+
+    mqtt.begin();
+}
+
+void loop() {
+    mqtt.loop();
+}
+```
+
+Notes:
+* Will messages will only be active if `will.topic` is not empty.
+* The `will` structure can be modified at any time, even when a connection is active.  However, it changes will take effect only after the client reconnects (after connection loss or after calling `mqtt.disconnect()`).
+* Default values of `will.qos` and `will.retain` are `0` and `false` respectively.
+
+## Connect and disconnect callbacks
+
+The client can be configured to fire callbacks after connecting and disconnecting to a server.  This is useful if a message needs to be sent as soon as the connection is established:
+
+```
+#include <Arduino.h>
+#include <PicoMQTT.h>
+
+PicoMQTT::Client mqtt("broker.hivemq.com");  // or PicoMQTT::Server mqtt;
+
+void setup() {
+    Serial.begin(115200);
+
+    /* ... */
+
+    mqtt.connected_callback = [] {
+        Serial.println("MQTT connected");
+    }
+
+    mqtt.disconnected_callback = [] {
+        Serial.println("MQTT disconnected");
+    }
+
+    mqtt.begin();
+}
+
+void loop() {
+    mqtt.loop();
+}
+```
+
+Notes:
+* It's safe to set or change the callbacks at any time.
+* It is not guaranteed that the connect callback will fire immediately after the connection is established.  Messages may sometimes be delivered first (to handlers configured using `subscribe`).
 
 ## Arbitrary sized messages
 
