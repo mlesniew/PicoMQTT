@@ -244,16 +244,18 @@ void Client::loop() {
             return;
         }
 
-        last_reconnect_attempt = millis();
-
-        if (!connect(host.c_str(), port,
+        const bool connection_established = connect(host.c_str(), port,
                      client_id.isEmpty() ? "" : client_id.c_str(),
                      username.isEmpty() ? nullptr : username.c_str(),
                      password.isEmpty() ? nullptr : password.c_str(),
                      will.topic.isEmpty() ? nullptr : will.topic.c_str(),
                      will.payload.isEmpty() ? nullptr : will.payload.c_str(),
                      will.payload.isEmpty() ? 0 : will.payload.length(),
-                     will.qos, will.retain)) {
+                     will.qos, will.retain);
+
+        last_reconnect_attempt = millis();
+
+        if (!connection_established) {
             return;
         }
 
