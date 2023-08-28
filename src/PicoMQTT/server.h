@@ -98,6 +98,7 @@ class BasicServer: public PicoMQTTInterface, public Publisher {
 
 class Server: public BasicServer, public SubscribedMessageListener {
     public:
+        using BasicServer::BasicServer;
         virtual void on_message(const char * topic, IncomingPacket & packet) override;
 };
 
