@@ -26,6 +26,11 @@ String Subscriber::get_topic_element(const char * topic, size_t index) {
     return ret;
 }
 
+String Subscriber::get_topic_element(const String & topic, size_t index) {
+    TRACE_FUNCTION
+    return get_topic_element(topic.c_str(), index);
+}
+
 bool Subscriber::topic_matches(const char * p, const char * t) {
     TRACE_FUNCTION
     // TODO: Special handling of the $ prefix
@@ -150,44 +155,6 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & t
     TRACE_FUNCTION
     return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
         callback(payload, payload_size);
-    });
-}
-
-Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
-        std::function<void(char *, String)> callback, size_t max_size) {
-    return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
-        // TODO: This is inefficient.  Incoming payload data should be read straight into a String object.
-        callback(topic, String((char *) payload));
-    });
-}
-
-Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
-        std::function<void(String, void *, size_t)> callback, size_t max_size) {
-    return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
-        callback(String(topic), payload, payload_size);
-    });
-}
-
-Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
-        std::function<void(String, char *)> callback, size_t max_size) {
-    return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
-        callback(String(topic), (char *) payload);
-    });
-}
-
-Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
-        std::function<void(String, String)> callback, size_t max_size) {
-    return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
-        // TODO: This is inefficient.  Incoming payload data should be read straight into a String object.
-        callback(String(topic), String((char *) payload));
-    });
-}
-
-Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
-        std::function<void(String)> callback, size_t max_size) {
-    return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
-        // TODO: This is inefficient.  Incoming payload data should be read straight into a String object.
-        callback(String((char *) payload));
     });
 }
 

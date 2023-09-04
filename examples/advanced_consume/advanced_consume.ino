@@ -86,6 +86,33 @@ void setup() {
         Serial.printf("Received message in topic '%s', it contained %u digits\n", topic, digit_count);
     });
 
+    // Arduino Strings can be used instead of const char *.  Note that this can be inefficient, especially with big
+    // payloads.
+    mqtt.subscribe("picomqtt/arduino_string/payload", [](const String & payload) {
+        Serial.printf("Received message in topic 'picomqtt/arduino_string/payload': %s\n", payload.c_str());
+    });
+
+    mqtt.subscribe("picomqtt/arduino_string/+/topic_and_payload", [](const String & topic, const String & payload) {
+        // If the topic contains wildcards, their values can be extracted easily too
+        String wildcard_value = mqtt.get_topic_element(topic, 2);
+
+        Serial.printf("Received message in topic '%s' (wildcard = '%s'): %s\n", topic.c_str(), wildcard_value.c_str(), payload.c_str());
+    });
+
+    // Different types of strings can be mixed too
+    mqtt.subscribe("picomqtt/arduino_string/mix/1", [](const String & topic, const char * payload) {
+        Serial.printf("Received message in topic '%s': %s\n", topic.c_str(), payload);
+    });
+
+    mqtt.subscribe("picomqtt/arduino_string/mix/2", [](const char * topic, const String & payload) {
+        Serial.printf("Received message in topic '%s': %s\n", topic, payload.c_str());
+    });
+
+    // const and reference can be skipped too
+    mqtt.subscribe("picomqtt/arduino_string/mix/3", [](char * topic, String payload) {
+        Serial.printf("Received message in topic '%s': %s\n", topic, payload.c_str());
+    });
+
     mqtt.begin();
 }
 

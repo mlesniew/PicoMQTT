@@ -18,6 +18,7 @@ class Subscriber {
 
         static bool topic_matches(const char * topic_filter, const char * topic);
         static String get_topic_element(const char * topic, size_t index);
+        static String get_topic_element(const String & topic, size_t index);
 
         virtual const char * get_subscription_pattern(SubscriptionId id) const = 0;
         virtual SubscriptionId get_subscription(const char * topic) const = 0;
@@ -53,20 +54,9 @@ class SubscribedMessageListener: public Subscriber {
 
         SubscriptionId subscribe(const String & topic_filter, std::function<void(char *, char *)> callback,
                                  size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
-        SubscriptionId subscribe(const String & topic_filter, std::function<void(char *, String)> callback,
-                                 size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
         SubscriptionId subscribe(const String & topic_filter, std::function<void(void *, size_t)> callback,
                                  size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
         SubscriptionId subscribe(const String & topic_filter, std::function<void(char *)> callback,
-                                 size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
-
-        SubscriptionId subscribe(const String & topic_filter, std::function<void(String, void *, size_t)> callback,
-                                 size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
-        SubscriptionId subscribe(const String & topic_filter, std::function<void(String, char *)> callback,
-                                 size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
-        SubscriptionId subscribe(const String & topic_filter, std::function<void(String, String)> callback,
-                                 size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
-        SubscriptionId subscribe(const String & topic_filter, std::function<void(String)> callback,
                                  size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
 
         virtual void unsubscribe(const String & topic_filter) override;
