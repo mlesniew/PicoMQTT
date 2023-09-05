@@ -1,2 +1,4 @@
 .pio
 *.orig
+*.tar.gz
+*.sh
