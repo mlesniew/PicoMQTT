@@ -214,6 +214,7 @@ bool OutgoingPacket::send() {
         case State::ok:
             // print.flush();
             state = State::sent;
+            __attribute__ ((fallthrough));
         case State::sent:
             return true;
         default:
