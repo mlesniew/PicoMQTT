@@ -8,14 +8,13 @@
 #include "pico_interface.h"
 #include "publisher.h"
 #include "subscriber.h"
+#include "utils.h"
 
 namespace PicoMQTT {
 
 class BasicClient: public PicoMQTTInterface, public Connection, public Publisher {
     public:
-        BasicClient(unsigned long keep_alive_seconds = 60, unsigned long socket_timeout_seconds = 10);
-
-        BasicClient(const ::WiFiClient & client, unsigned long keep_alive_seconds = 60,
+        BasicClient(::Client & client, unsigned long keep_alive_seconds = 60,
                     unsigned long socket_timeout_seconds = 10);
 
         bool connect(
@@ -41,10 +40,40 @@ class BasicClient: public PicoMQTTInterface, public Connection, public Publisher
         virtual bool on_publish_complete(const Publish & publish) override;
 };
 
-class Client: public BasicClient, public SubscribedMessageListener {
+class ClientSocketInterface {
+    public:
+        virtual ::Client & get_client() = 0;
+        virtual ~ClientSocketInterface() {}
+};
+
+class ClientSocketProxy: public ClientSocketInterface {
+    public:
+        ClientSocketProxy(::Client & client): client(client) {}
+        virtual ::Client & get_client() override { return client; }
+        ::Client & client;
+};
+
+template <typename ClientType>
+class ClientSocket: public ClientType, public ClientSocketInterface {
+    public:
+        using ClientType::ClientType;
+        virtual ::Client & get_client() override { return *this; }
+};
+
+class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public BasicClient,
+            public SubscribedMessageListener {
     public:
         Client(const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr, const char * user = nullptr,
-               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000);
+               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000)
+            : Client(new ClientSocket<::WiFiClient>(), host, port, id, user, password, reconnect_interval_millis) {
+        }
+
+        template <typename ClientType>
+        Client(ClientType & client, const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr,
+               const char * user = nullptr,
+               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000)
+            : Client(new ClientSocketProxy(client), host, port, id, user, password, reconnect_interval_millis) {
+        }
 
         using SubscribedMessageListener::subscribe;
         virtual SubscriptionId subscribe(const String & topic_filter, MessageCallback callback) override;
@@ -75,8 +104,13 @@ class Client: public BasicClient, public SubscribedMessageListener {
         virtual void on_disconnect() override;
 
     protected:
+        Client(ClientSocketInterface * client,
+               const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr, const char * user = nullptr,
+               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000);
+
         unsigned long last_reconnect_attempt;
         virtual void on_message(const char * topic, IncomingPacket & packet) override;
+
 };
 
 }

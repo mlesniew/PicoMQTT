@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 
 #include <Arduino.h>
 
@@ -24,10 +25,8 @@ enum ConnectReturnCode : uint8_t {
 
 class Connection {
     public:
-        Connection(unsigned long keep_alive_seconds = 0, unsigned long socket_timeout_seconds = 15);
-        Connection(const ::WiFiClient & client, unsigned long keep_alive_seconds = 0,
+        Connection(::Client & client, unsigned long keep_alive_seconds = 0,
                    unsigned long socket_timeout_seconds = 15);
-        Connection(const Connection &) = default;
 
         virtual ~Connection() {}
 

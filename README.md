@@ -325,6 +325,44 @@ serializeJson(json, publish);
 publish.send();
 ```
 
+## Custom server and client types (e.g. Ethernet)
+
+By default, PicoMQTT will use the built-in WiFi interface of the device (using `WiFiClient` or `WiFiServer` objects internally).  You can, however, tell it to use custom classes instead.  This is useful to use PicoMQTT with TLS (e.g. using `WiFiClientSecure`) or with an Ethernet board.
+
+### Clients
+
+A PicoMQTT client can be used with any subclass of the standard Arduino `Client`.  To create an instance with a custom client object, pass it as the first argument to the `PicoMQTT::Client` constructor (the remaining parameters are the usual ones).  For example:
+
+```
+EthernetClient client;
+PicoMQTT::Client mqtt(client, "broker.hivemq.com");
+```
+
+The `mqtt` instance can be used as usual.  Additional `client` setup can be done in the `setup()` function, before the `mqtt.begin()` call.
+
+### Servers
+
+A PicoMQTT server can be used with any class that has an interface roughly similar to other servers, e.g. `WiFiServer` or `EtherenetServer`.  The only required methods are `begin()` and `accept()`.  To set up a broker with a custom server, pass it as the first argument to the `PicoMQTT::Server` constructor, for example:
+
+```
+EthernetServer server(1883);
+PicoMQTT::Server mqtt(server);
+```
+
+The `mqtt` instance can be used as usual.  Additional `server` setup can be done in the `setup()` function, before the `mqtt.begin()` call.
+
+### Multiserver
+
+Sometimes it's useful to run a broker, which can handle connections from different interfaces (e.g. WiFi and Ethernet).  This is also possible -- just pass multiple servers as parameters to the constructor:
+
+```
+WiFiServer wifi_server(1883);
+EthernetServer eth_server(1883);
+PicoMQTT::Server mqtt(wifi_server, eth_server);
+```
+
+With this setup, the `mqtt` instance will accept connections from both servers and will be able to route messages between them.
+
 ## Benchmarks
 
 Charts in this section show PicoMQTT how many messages a broker running on the ESP8266 and ESP32 was able to deliver per second per client depending on the payload size and the number of subscribed clients.

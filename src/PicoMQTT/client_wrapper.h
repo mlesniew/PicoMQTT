@@ -4,10 +4,9 @@
 
 namespace PicoMQTT {
 
-class ClientWrapper: public ::WiFiClient {
+class ClientWrapper: public ::Client {
     public:
-        ClientWrapper(unsigned long socket_timeout_seconds);
-        ClientWrapper(const WiFiClient & client, unsigned long socket_timeout_seconds);
+        ClientWrapper(::Client & client, unsigned long socket_timeout_seconds);
         ClientWrapper(const ClientWrapper &) = default;
 
         virtual int peek() override;
@@ -16,15 +15,25 @@ class ClientWrapper: public ::WiFiClient {
         virtual size_t write(const uint8_t * buffer, size_t size) override;
         virtual size_t write(uint8_t value) override final;
 
-#ifdef ESP32
-        // these methods are only available in WiFiClient on ESP8266
-        uint8_t status() { return connected(); }
-        void abort() { stop(); }
-#endif
+        // all of the below call the corresponding method on this->client
+        virtual int connect(IPAddress ip, uint16_t port) override;
+        virtual int connect(const char * host, uint16_t port) override;
+        virtual int available() override;
+        virtual void flush() override;
+        virtual void stop() override;
+        virtual uint8_t connected() override;
+        virtual operator bool() override;
 
         const unsigned long socket_timeout_millis;
 
+        void abort() {
+            // TODO: Use client.abort() if client is a WiFiClient on ESP8266?
+            stop();
+        }
+
     protected:
+        ::Client & client;
+
         int available_wait(unsigned long timeout);
 };
 

@@ -3,12 +3,7 @@
 
 namespace PicoMQTT {
 
-BasicClient::BasicClient(unsigned long keep_alive_seconds, unsigned long socket_timeout_seconds)
-    : Connection(keep_alive_seconds, socket_timeout_seconds) {
-    TRACE_FUNCTION
-}
-
-BasicClient::BasicClient(const ::WiFiClient & client, unsigned long keep_alive_seconds,
+BasicClient::BasicClient(::Client & client, unsigned long keep_alive_seconds,
                          unsigned long socket_timeout_seconds)
     : Connection(client, keep_alive_seconds, socket_timeout_seconds) {
     TRACE_FUNCTION
@@ -129,7 +124,7 @@ Publisher::Publish BasicClient::begin_publish(const char * topic, const size_t p
     TRACE_FUNCTION
     return Publish(
                *this,
-               client.status() ? client : PrintMux(),
+               client.connected() ? client : PrintMux(),
                topic, payload_size,
                (qos >= 1) ? 1 : 0,
                retain,
@@ -208,9 +203,12 @@ bool BasicClient::unsubscribe(const String & topic) {
     return client.connected();
 }
 
-Client::Client(const char * host, uint16_t port, const char * id, const char * user, const char * password,
+Client::Client(ClientSocketInterface * socket,
+               const char * host, uint16_t port, const char * id, const char * user, const char * password,
                unsigned long reconnect_interval_millis)
-    : host(host), port(port), client_id(id), username(user), password(password),
+    : SocketOwner<std::unique_ptr<ClientSocketInterface>>(socket),
+      BasicClient(this->socket->get_client()),
+      host(host), port(port), client_id(id), username(user), password(password),
       will({"", "", 0, false}),
 reconnect_interval_millis(reconnect_interval_millis),
 last_reconnect_attempt(millis() - reconnect_interval_millis) {

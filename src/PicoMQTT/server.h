@@ -19,19 +19,119 @@
 #include "publisher.h"
 #include "subscriber.h"
 #include "pico_interface.h"
+#include "utils.h"
 
 namespace PicoMQTT {
 
-class BasicServer: public PicoMQTTInterface, public Publisher {
+class ServerSocketInterface {
     public:
-        class Client: public Connection, public Subscriber {
+        ServerSocketInterface() {}
+        virtual ~ServerSocketInterface() {}
+
+        ServerSocketInterface(const ServerSocketInterface &) = delete;
+        const ServerSocketInterface & operator=(const ServerSocketInterface &) = delete;
+
+        virtual void begin() = 0;
+        virtual ::Client * accept_client() = 0;
+};
+
+template <typename Server>
+class ServerSocket: public ServerSocketInterface, public Server {
+    public:
+        using Server::Server;
+
+        virtual ::Client * accept_client() override {
+            TRACE_FUNCTION
+            auto client = Server::accept();
+            if (!client) {
+                // no connection
+                return nullptr;
+            }
+
+            return new decltype(client)(client);
+        };
+
+        virtual void begin() override {
+            TRACE_FUNCTION
+            Server::begin();
+        }
+};
+
+template <typename Server>
+class ServerSocketProxy: public ServerSocketInterface {
+    public:
+        Server & server;
+
+        ServerSocketProxy(Server & server): server(server) {}
+
+        virtual ::Client * accept_client() override {
+            TRACE_FUNCTION
+            auto client = server.accept();
+            if (!client) {
+                // no connection
+                return nullptr;
+            }
+
+            return new decltype(client)(client);
+        };
+
+        virtual void begin() override {
+            TRACE_FUNCTION
+            server.begin();
+        }
+
+};
+
+class ServerSocketMux: public ServerSocketInterface {
+    public:
+        template <typename... Targs>
+        ServerSocketMux(Targs & ... Fargs) {
+            add(Fargs...);
+        }
+
+        virtual ::Client * accept_client() override {
+            TRACE_FUNCTION
+            for (auto & server : servers) {
+                auto client = server->accept_client();
+                if (client) {
+                    // no connection
+                    return client;
+                }
+            }
+            return nullptr;
+        };
+
+        virtual void begin() override {
+            TRACE_FUNCTION
+            for (auto & server : servers) {
+                server->begin();
+            }
+        }
+
+    protected:
+        template <typename Server>
+        void add(Server & server) {
+            servers.push_back(std::unique_ptr<ServerSocketInterface>(new ServerSocketProxy<Server>(server)));
+        }
+
+        template <typename Server, typename... Targs>
+        void add(Server & server, Targs & ... Fargs) {
+            add(server);
+            add(Fargs...);
+        }
+
+        std::vector<std::unique_ptr<ServerSocketInterface>> servers;
+};
+
+class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessageListener {
+    public:
+        class Client: public SocketOwner<std::unique_ptr<::Client>>, public Connection, public Subscriber {
             public:
-                Client(BasicServer & server, const WiFiClient & client);
-                Client(const Client &);
+                Client(Server & server, ::Client * client);
 
                 void on_message(const char * topic, IncomingPacket & packet) override;
 
-                Print & get_print() { return client; }
+                Print & get_print() { return Connection::client; }
                 const char * get_client_id() const { return client_id.c_str(); }
 
                 virtual void loop() override;
@@ -42,7 +142,7 @@ class BasicServer: public PicoMQTTInterface, public Publisher {
                 virtual void unsubscribe(const String & topic_filter) override;
 
             protected:
-                BasicServer & server;
+                Server & server;
                 String client_id;
                 std::set<Subscription> subscriptions;
 
@@ -65,18 +165,40 @@ class BasicServer: public PicoMQTTInterface, public Publisher {
                 Publish & publish;
         };
 
-        BasicServer(uint16_t port = 1883, unsigned long keep_alive_tolerance_seconds = 10,
-                    unsigned long socket_timeout_seconds = 5);
+        Server(std::unique_ptr<ServerSocketInterface> socket);
+
+        Server(uint16_t port = 1883)
+            : Server(new ServerSocket<::WiFiServer>(port)) {
+            TRACE_FUNCTION
+        }
+
+        template <typename ServerType>
+        Server(ServerType & server)
+            : Server(new ServerSocketProxy<ServerType>(server)) {
+            TRACE_FUNCTION
+        }
+
+        template <typename ServerType, typename... Targs>
+        Server(ServerType & server, Targs & ... Fargs): Server(new ServerSocketMux(server, Fargs...)) {
+            TRACE_FUNCTION
+        }
 
         void begin() override;
-        void stop() override;
         void loop() override;
 
         using Publisher::begin_publish;
         virtual Publish begin_publish(const char * topic, const size_t payload_size,
                                       uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
 
+        unsigned long keep_alive_tolerance_seconds;
+        unsigned long socket_timeout_seconds;
+
     protected:
+        Server(ServerSocketInterface * socket)
+            : Server(std::unique_ptr<ServerSocketInterface>(socket)) {
+            TRACE_FUNCTION
+        }
+
         virtual void on_message(const char * topic, IncomingPacket & packet);
         virtual ConnectReturnCode auth(const char * client_id, const char * username, const char * password) { return CRC_ACCEPTED; }
 
@@ -88,18 +210,8 @@ class BasicServer: public PicoMQTTInterface, public Publisher {
 
         virtual PrintMux get_subscribed(const char * topic);
 
-        WiFiServer server;
-        std::list<Client> clients;
-
-        const unsigned long keep_alive_tolerance_seconds;
-        const unsigned long socket_timeout_seconds;
-
-};
-
-class Server: public BasicServer, public SubscribedMessageListener {
-    public:
-        using BasicServer::BasicServer;
-        virtual void on_message(const char * topic, IncomingPacket & packet) override;
+        std::unique_ptr<ServerSocketInterface> server;
+        std::list<std::unique_ptr<Client>> clients;
 };
 
 }
