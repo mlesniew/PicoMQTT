@@ -63,7 +63,7 @@ class Connection {
         virtual void on_disconnect();
 
         ClientWrapper client;
-        uint16_t keep_alive_millis;
+        unsigned long keep_alive_millis;
 
         virtual void handle_packet(IncomingPacket & packet);
 

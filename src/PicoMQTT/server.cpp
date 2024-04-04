@@ -5,7 +5,7 @@
 namespace PicoMQTT {
 
 BasicServer::Client::Client(const BasicServer::Client & other)
-    : Connection(other.client, 0),
+    : Connection(other.client, other.keep_alive_millis / 1000, other.client.socket_timeout_millis / 1000),
       server(other.server),
       client_id(other.client_id) {
     TRACE_FUNCTION
@@ -66,7 +66,7 @@ BasicServer::Client::Client(BasicServer & server, const WiFiClient & client)
             return;
         }
 
-        const uint16_t keep_alive_seconds = packet.read_u16();
+        const unsigned long keep_alive_seconds = packet.read_u16();
         keep_alive_millis = keep_alive_seconds ? (keep_alive_seconds + this->server.keep_alive_tolerance_seconds) * 1000 : 0;
 
         {
