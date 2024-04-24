@@ -9,12 +9,14 @@ This is a lightweight and easy to use MQTT library for ESP8266 and ESP32 devices
 [![ESP8266](https://img.shields.io/badge/ESP-8266-000000.svg?longCache=true&style=flat&colorA=CC101F)](https://www.espressif.com/en/products/socs/esp8266) [![ESP32](https://img.shields.io/badge/ESP-32-000000.svg?longCache=true&style=flat&colorA=CC101F)](https://www.espressif.com/en/products/socs/esp32)
 
 Features:
-* Client and broker mode supported
-* Intuitive API
-* [MQTT 3.1.1](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html) implementation
-* Publishing and consuming of [arbitrary sized messages](#arbitrary-sized-messages)
+* Works in client and broker mode
+* Implements [MQTT 3.1.1](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html)
+* Supports publishing and consuming of [arbitrary sized messages](#arbitrary-sized-messages)
 * High performance -- the broker can deliver thousands of messages per second -- [see benchmarks](#benchmarks)
+* Works on [WiFi, Ethernet and more](#custom-server-and-client-types)
+* Supports connections over [websockets](#websocket-support)
 * Easy integration with the [ArduinoJson](https://arduinojson.org/) library to publish and consume JSON messages -- [see examples](#json)
+* Intuitive API
 * Low memory usage
 
 Limitations:
@@ -29,8 +31,8 @@ Limitations:
 * [PlatformIO](https://registry.platformio.org/libraries/mlesniew/PicoMQTT/installation)
 
 Additionally, PicoMQTT requires a recent version of the board core:
-** For ESP8266 core version 3.1 or later
-** For ESP32 core version 2.0.7 or later
+* For ESP8266 core version 3.1 or later
+* For ESP32 core version 2.0.7 or later
 
 
 ## Quickstart
@@ -323,7 +325,7 @@ serializeJson(json, publish);
 publish.send();
 ```
 
-## Custom server and client types (e.g. Ethernet)
+## Custom server and client types
 
 By default, PicoMQTT will use the built-in WiFi interface of the device (using `WiFiClient` or `WiFiServer` objects internally).  You can, however, tell it to use custom classes instead.  This is useful to use PicoMQTT with TLS (e.g. using `WiFiClientSecure`) or with an Ethernet board.
 
@@ -338,6 +340,8 @@ PicoMQTT::Client mqtt(client, "broker.hivemq.com");
 
 The `mqtt` instance can be used as usual.  Additional `client` setup can be done in the `setup()` function, before the `mqtt.begin()` call.
 
+Full example available [here](examples/w5500_client/w5500_client.ino).
+
 ### Servers
 
 A PicoMQTT server can be used with any class that has an interface roughly similar to other servers, e.g. `WiFiServer` or `EtherenetServer`.  The only required methods are `begin()` and `accept()`.  To set up a broker with a custom server, pass it as the first argument to the `PicoMQTT::Server` constructor, for example:
@@ -348,6 +352,8 @@ PicoMQTT::Server mqtt(server);
 ```
 
 The `mqtt` instance can be used as usual.  Additional `server` setup can be done in the `setup()` function, before the `mqtt.begin()` call.
+
+Full example available [here](examples/w5500_server/w5500_server.ino).
 
 ### Multiserver
 
@@ -360,6 +366,28 @@ PicoMQTT::Server mqtt(wifi_server, eth_server);
 ```
 
 With this setup, the `mqtt` instance will accept connections from both servers and will be able to route messages between them.
+
+Full example available [here](examples/multi_server/multi_server.ino).
+
+## Websockets support
+
+PicoMQTT supports connections over WebSockets with the [PicoWebsocket](https://github.com/mlesniew/Picowebsocket) library.  With this dependency installed, broker and client set up is the same as with other custom sockets:
+
+```
+#include <PicoMQTT.h>
+#include <PicoWebsocket.h>
+
+// Create a server -- most other servers can be used here too (e.g. EthernetServer)
+WiFiServer server(80);
+
+// Create a websocket instance which uses the server
+PicoWebsocket::Server<::WiFiServer> websocket_server(server);
+
+// Create a MQTT server
+PicoMQTT::Server mqtt(websocket_server);
+```
+
+Full example available [here](examples/websocket_server/websocket_server.ino).
 
 ## Benchmarks
 
@@ -381,6 +409,10 @@ Charts in this section show PicoMQTT how many messages a broker running on the E
 ![ESP32 broker performance](doc/img/benchmark-esp32.svg)
 
 [Get CSV](doc/benchmark/esp32.csv)
+
+## Special thanks
+
+Many thanks to [Michael Haberler](https://github.com/mhaberler) for his support with the MQTT over WebSocket feature.
 
 ## License
 
