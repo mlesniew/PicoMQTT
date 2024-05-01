@@ -1,3 +1,4 @@
+// dependencies: bblanchon/ArduinoJson
 #include <PicoMQTT.h>
 
 #if __has_include("config.h")

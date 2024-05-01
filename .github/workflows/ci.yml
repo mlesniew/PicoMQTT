@@ -34,16 +34,9 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+      - name: Install jq
+        run: sudo apt-get install -yq jq
       - name: Install PlatformIO Core
         run: pip install --upgrade platformio
       - name: Build examples
-        run: |
-          for example in examples/*; do
-            cd "$example"
-            platformio init --board ${{ matrix.board }}
-            grep -q ArduinoJson *.ino && echo "lib_deps = bblanchon/ArduinoJson" >> platformio.ini
-            mv *.ino src/
-            ln -s ../../../ lib/PicoMQTT
-            pio run
-            cd ../..
-          done
+        run: ./build_examples.sh ${{ matrix.board }}
