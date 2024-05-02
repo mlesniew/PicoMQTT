@@ -7,7 +7,7 @@ namespace PicoMQTT {
 Server::Client::Client(Server & server, ::Client * client)
     :
     SocketOwner(client),
-    Connection(*socket, 0, server.socket_timeout_seconds), server(server), client_id("<unknown>") {
+    Connection(*socket, 0, server.socket_timeout_millis), server(server), client_id("<unknown>") {
     TRACE_FUNCTION
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
         TRACE_FUNCTION
@@ -62,7 +62,7 @@ Server::Client::Client(Server & server, ::Client * client)
         }
 
         const unsigned long keep_alive_seconds = packet.read_u16();
-        keep_alive_millis = keep_alive_seconds ? (keep_alive_seconds + this->server.keep_alive_tolerance_seconds) * 1000 : 0;
+        keep_alive_millis = keep_alive_seconds ? (keep_alive_seconds * 1000 + this->server.keep_alive_tolerance_millis) : 0;
 
         {
             const size_t client_id_size = packet.read_u16();
@@ -294,7 +294,7 @@ int Server::IncomingPublish::read() {
 }
 
 Server::Server(std::unique_ptr<ServerSocketInterface> server)
-    : keep_alive_tolerance_seconds(10), socket_timeout_seconds(5), server(std::move(server)) {
+    : keep_alive_tolerance_millis(10 * 1000), socket_timeout_millis(5 * 1000), server(std::move(server)) {
     TRACE_FUNCTION
 }
 

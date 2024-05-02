@@ -25,8 +25,8 @@ enum ConnectReturnCode : uint8_t {
 
 class Connection {
     public:
-        Connection(::Client & client, unsigned long keep_alive_seconds = 0,
-                   unsigned long socket_timeout_seconds = 15);
+        Connection(::Client & client, unsigned long keep_alive_millis = 0,
+                   unsigned long socket_timeout_millis = 15 * 1000);
 
         virtual ~Connection() {}
 

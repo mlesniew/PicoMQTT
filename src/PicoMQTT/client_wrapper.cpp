@@ -6,8 +6,8 @@
 
 namespace PicoMQTT {
 
-ClientWrapper::ClientWrapper(::Client & client, unsigned long socket_timeout_seconds):
-    socket_timeout_millis(socket_timeout_seconds * 1000), client(client) {
+ClientWrapper::ClientWrapper(::Client & client, unsigned long socket_timeout_millis):
+    socket_timeout_millis(socket_timeout_millis), client(client) {
     TRACE_FUNCTION
 }
 

@@ -4,10 +4,9 @@
 
 namespace PicoMQTT {
 
-Connection::Connection(::Client & client, unsigned long keep_alive_seconds,
-                       unsigned long socket_timeout_seconds) :
-    client(client, socket_timeout_seconds),
-    keep_alive_millis(keep_alive_seconds * 1000),
+Connection::Connection(::Client & client, unsigned long keep_alive_millis, unsigned long socket_timeout_millis) :
+    client(client, socket_timeout_millis),
+    keep_alive_millis(keep_alive_millis),
     last_read(millis()), last_write(millis()) {
     TRACE_FUNCTION
 }

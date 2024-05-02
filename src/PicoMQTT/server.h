@@ -190,8 +190,8 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
         virtual Publish begin_publish(const char * topic, const size_t payload_size,
                                       uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
 
-        unsigned long keep_alive_tolerance_seconds;
-        unsigned long socket_timeout_seconds;
+        unsigned long keep_alive_tolerance_millis;
+        unsigned long socket_timeout_millis;
 
     protected:
         Server(ServerSocketInterface * socket)

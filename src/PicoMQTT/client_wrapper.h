@@ -6,7 +6,7 @@ namespace PicoMQTT {
 
 class ClientWrapper: public ::Client {
     public:
-        ClientWrapper(::Client & client, unsigned long socket_timeout_seconds);
+        ClientWrapper(::Client & client, unsigned long socket_timeout_millis);
         ClientWrapper(const ClientWrapper &) = default;
 
         virtual int peek() override;

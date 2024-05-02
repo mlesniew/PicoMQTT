@@ -14,8 +14,8 @@ namespace PicoMQTT {
 
 class BasicClient: public PicoMQTTInterface, public Connection, public Publisher {
     public:
-        BasicClient(::Client & client, unsigned long keep_alive_seconds = 60,
-                    unsigned long socket_timeout_seconds = 10);
+        BasicClient(::Client & client, unsigned long keep_alive_millis = 60 * 1000,
+                    unsigned long socket_timeout_millis = 10 * 1000);
 
         bool connect(
             const char * host, uint16_t port = 1883,
@@ -64,15 +64,17 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
             public SubscribedMessageListener {
     public:
         Client(const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr, const char * user = nullptr,
-               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000)
-            : Client(new ClientSocket<::WiFiClient>(), host, port, id, user, password, reconnect_interval_millis) {
+               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000,
+               unsigned long keep_alive_millis = 60 * 1000, unsigned long socket_timeout_millis = 10 * 1000)
+            : Client(new ClientSocket<::WiFiClient>(), host, port, id, user, password, reconnect_interval_millis, keep_alive_millis, socket_timeout_millis) {
         }
 
         template <typename ClientType>
         Client(ClientType & client, const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr,
-               const char * user = nullptr,
-               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000)
-            : Client(new ClientSocketProxy(client), host, port, id, user, password, reconnect_interval_millis) {
+               const char * user = nullptr, const char * password = nullptr,
+               unsigned long reconnect_interval_millis = 5 * 1000,
+               unsigned long keep_alive_millis = 60 * 1000, unsigned long socket_timeout_millis = 10 * 1000)
+            : Client(new ClientSocketProxy(client), host, port, id, user, password, reconnect_interval_millis, keep_alive_millis, socket_timeout_millis) {
         }
 
         using SubscribedMessageListener::subscribe;
@@ -105,8 +107,8 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
 
     protected:
         Client(ClientSocketInterface * client,
-               const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr, const char * user = nullptr,
-               const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000);
+               const char * host, uint16_t port, const char * id, const char * user, const char * password,
+               unsigned long reconnect_interval_millis, unsigned long keep_alive_millis, unsigned long socket_timeout_millis);
 
         unsigned long last_reconnect_attempt;
         virtual void on_message(const char * topic, IncomingPacket & packet) override;

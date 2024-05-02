@@ -3,9 +3,9 @@
 
 namespace PicoMQTT {
 
-BasicClient::BasicClient(::Client & client, unsigned long keep_alive_seconds,
-                         unsigned long socket_timeout_seconds)
-    : Connection(client, keep_alive_seconds, socket_timeout_seconds) {
+BasicClient::BasicClient(::Client & client, unsigned long keep_alive_millis,
+                         unsigned long socket_timeout_millis)
+    : Connection(client, keep_alive_millis, socket_timeout_millis) {
     TRACE_FUNCTION
 }
 
@@ -205,13 +205,13 @@ bool BasicClient::unsubscribe(const String & topic) {
 
 Client::Client(ClientSocketInterface * socket,
                const char * host, uint16_t port, const char * id, const char * user, const char * password,
-               unsigned long reconnect_interval_millis)
+               unsigned long reconnect_interval_millis, unsigned long keep_alive_millis, unsigned long socket_timeout_millis)
     : SocketOwner<std::unique_ptr<ClientSocketInterface>>(socket),
-      BasicClient(this->socket->get_client()),
+      BasicClient(this->socket->get_client(), keep_alive_millis, socket_timeout_millis),
       host(host), port(port), client_id(id), username(user), password(password),
       will({"", "", 0, false}),
-reconnect_interval_millis(reconnect_interval_millis),
-last_reconnect_attempt(millis() - reconnect_interval_millis) {
+      reconnect_interval_millis(reconnect_interval_millis),
+      last_reconnect_attempt(millis() - reconnect_interval_millis) {
     TRACE_FUNCTION
 }
 
