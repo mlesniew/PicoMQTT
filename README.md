@@ -296,8 +296,7 @@ It's easy to publish and subscribe to JSON messages by integrating with [Arduino
 
 ```
 mqtt.subscribe("picomqtt/json/#", [](const char * topic, Stream & stream) {
-    // declare a StaticJsonDocument or DynamicJsonDocument as usual
-    StaticJsonDocument<1024> json;
+    JsonDocument json;
 
     // Deserialize straight from the Stream object
     if (deserializeJson(json, stream)) {
@@ -314,8 +313,7 @@ mqtt.subscribe("picomqtt/json/#", [](const char * topic, Stream & stream) {
 ### Publishing
 
 ```
-// declare a StaticJsonDocument or DynamicJsonDocument and add data as usual
-StaticJsonDocument<1024> json;
+JsonDocument json;
 json["foo"] = "bar";
 json["millis"] = millis();
 

@@ -34,7 +34,7 @@ void setup() {
     // Subscribe to a topic and attach a callback
     mqtt.subscribe("picomqtt/json/#", [](const char * topic, Stream & stream) {
         Serial.printf("Received message in topic '%s':\n", topic);
-        StaticJsonDocument<1024> json;
+        JsonDocument json;
         if (deserializeJson(json, stream)) {
             Serial.println("Json parsing failed.");
             return;
