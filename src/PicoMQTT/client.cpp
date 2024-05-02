@@ -254,6 +254,8 @@ void Client::loop() {
         last_reconnect_attempt = millis();
 
         if (!connection_established) {
+            if (connection_failure_callback)
+                connection_failure_callback();
             return;
         }
 

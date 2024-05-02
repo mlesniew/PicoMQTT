@@ -101,6 +101,7 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
 
         std::function<void()> connected_callback;
         std::function<void()> disconnected_callback;
+        std::function<void()> connection_failure_callback;
 
         virtual void on_connect() override;
         virtual void on_disconnect() override;
