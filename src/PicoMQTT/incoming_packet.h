@@ -10,6 +10,7 @@ namespace PicoMQTT {
 class IncomingPacket: public Packet, public Client {
     public:
         IncomingPacket(Client & client);
+        IncomingPacket(const Type type, const uint8_t flags, const size_t size, Client & client);
         IncomingPacket(IncomingPacket &&);
 
         IncomingPacket(const IncomingPacket &) = delete;

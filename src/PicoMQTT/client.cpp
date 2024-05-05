@@ -210,8 +210,8 @@ Client::Client(ClientSocketInterface * socket,
       BasicClient(this->socket->get_client(), keep_alive_millis, socket_timeout_millis),
       host(host), port(port), client_id(id), username(user), password(password),
       will({"", "", 0, false}),
-      reconnect_interval_millis(reconnect_interval_millis),
-      last_reconnect_attempt(millis() - reconnect_interval_millis) {
+reconnect_interval_millis(reconnect_interval_millis),
+last_reconnect_attempt(millis() - reconnect_interval_millis) {
     TRACE_FUNCTION
 }
 
@@ -254,8 +254,9 @@ void Client::loop() {
         last_reconnect_attempt = millis();
 
         if (!connection_established) {
-            if (connection_failure_callback)
+            if (connection_failure_callback) {
                 connection_failure_callback();
+            }
             return;
         }
 

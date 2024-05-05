@@ -14,6 +14,11 @@ IncomingPacket::IncomingPacket(IncomingPacket && other)
     other.pos = size;
 }
 
+IncomingPacket::IncomingPacket(const Type type, const uint8_t flags, const size_t size, Client & client)
+    : Packet(type, flags, size), client(client) {
+    TRACE_FUNCTION
+}
+
 IncomingPacket::~IncomingPacket() {
     TRACE_FUNCTION
 #ifdef PICOMQTT_DEBUG

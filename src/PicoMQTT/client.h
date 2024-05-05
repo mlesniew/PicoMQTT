@@ -66,7 +66,8 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
         Client(const char * host = nullptr, uint16_t port = 1883, const char * id = nullptr, const char * user = nullptr,
                const char * password = nullptr, unsigned long reconnect_interval_millis = 5 * 1000,
                unsigned long keep_alive_millis = 60 * 1000, unsigned long socket_timeout_millis = 10 * 1000)
-            : Client(new ClientSocket<::WiFiClient>(), host, port, id, user, password, reconnect_interval_millis, keep_alive_millis, socket_timeout_millis) {
+            : Client(new ClientSocket<::WiFiClient>(), host, port, id, user, password, reconnect_interval_millis, keep_alive_millis,
+                     socket_timeout_millis) {
         }
 
         template <typename ClientType>
@@ -74,7 +75,8 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
                const char * user = nullptr, const char * password = nullptr,
                unsigned long reconnect_interval_millis = 5 * 1000,
                unsigned long keep_alive_millis = 60 * 1000, unsigned long socket_timeout_millis = 10 * 1000)
-            : Client(new ClientSocketProxy(client), host, port, id, user, password, reconnect_interval_millis, keep_alive_millis, socket_timeout_millis) {
+            : Client(new ClientSocketProxy(client), host, port, id, user, password, reconnect_interval_millis, keep_alive_millis,
+                     socket_timeout_millis) {
         }
 
         using SubscribedMessageListener::subscribe;

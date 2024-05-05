@@ -169,15 +169,23 @@ Notes:
 * The topic and the payload are both buffers allocated on the stack.  They will become invalid after the callback returns.  If you need to store the payload for later, make sure to copy it to a separate buffer.
 * By default, the maximum topic and payload sizes are is 128 and 1024 bytes respectively.  This can be tuned by using `#define` directives to override values from [config.h](src/PicoMQTT/config.h).  Consider using the advanced API described in the later sections to handle bigger messages.
 * If a received message's topic matches more than one pattern, then only one of the callbacks will be fired.
-* `PicoMQTT::Server` will not deliver published messages locally.  This means that if you set up a `PicoMQTT::Server`
-and use `subscribe`, your callback will only be called when messages from clients are received.  Messages published on
-the same device will not trigger the callback.
 * Try to return from message handlers quickly.  Don't call functions which may block (like reading from serial or network connections), don't use the `delay()` function.
 * More examples available [here](examples/advanced_consume/advanced_consume.ino)
 
+### Delivery of messages published on the broker
+
+`PicoMQTT::Server` will not deliver published messages locally.  This means that setting up a `PicoMQTT::Server` and using `subscribe`, will fire callbacks only when messages from clients are received.  Messages published locally, on the same device will not trigger the callback.
+
+`PicoMQTT::ServerLocalSubscribe` can be used as a drop-in replacement for `PicoMQTT::Server` to get around this limitation. This variant of the broker works just the same, but it fires subscription callbacks for messages published locally using the `publish` and `publish_P` methods.  Note that publishing using `begin_publish` will work as in `PicoMQTT::Server` (so it will not fire local callbacks).
+
+`PicoMQTT::ServerLocalSubscribe` has slightly worse performance and can be memory intensive, especially if large messages are published and subscribed to locally.  Therefore, it should only be used when really needed.  Moreover, it has one additional limitation: it's *subscription callbacks must not publish any messages* or it may cause a crash.
+
+Example available [here](examples/server_local_subscribe/server_local_subscribe.ino).
+
+
 ## Last Will Testament messages
 
-Clients can be configured with a will message (aka LWT).  This can be configured by changing elements of the client's `will`.structure:
+Clients can be configured with a will message (aka LWT).  This can be configured by changing elements of the client's `will` structure:
 
 ```
 #include <PicoMQTT.h>

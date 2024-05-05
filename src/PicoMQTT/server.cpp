@@ -2,6 +2,63 @@
 #include "debug.h"
 #include "server.h"
 
+namespace {
+
+class BufferClient: public ::Client {
+    public:
+        BufferClient(const void * ptr): ptr((const char *) ptr) { TRACE_FUNCTION }
+
+        // these methods are nop dummies
+        virtual int connect(IPAddress ip, uint16_t port) override final { TRACE_FUNCTION return 0; }
+        virtual int connect(const char * host, uint16_t port) override final { TRACE_FUNCTION return 0; }
+        virtual size_t write(const uint8_t * buffer, size_t size) override final { TRACE_FUNCTION return 0; }
+        virtual size_t write(uint8_t value) override final { TRACE_FUNCTION return 0; }
+        virtual void flush() override final { TRACE_FUNCTION }
+        virtual void stop() override final { TRACE_FUNCTION }
+
+        // these methods are in jasager mode
+        virtual int available() override final { TRACE_FUNCTION return std::numeric_limits<int>::max(); }
+        virtual operator bool() override final { TRACE_FUNCTION return true; }
+        virtual uint8_t connected() override final { TRACE_FUNCTION return true; }
+
+        // actual reads implemented here
+        virtual int read(uint8_t * buf, size_t size) override {
+            memcpy(buf, ptr, size);
+            ptr += size;
+            return size;
+        }
+
+        virtual int read() override final {
+            TRACE_FUNCTION
+            uint8_t ret;
+            read(&ret, 1);
+            return ret;
+        }
+
+        virtual int peek() override final {
+            TRACE_FUNCTION
+            const int ret = read();
+            --ptr;
+            return ret;
+        }
+
+    protected:
+        const char * ptr;
+};
+
+class BufferClientP: public BufferClient {
+    public:
+        using BufferClient::BufferClient;
+
+        virtual int read(uint8_t * buf, size_t size) override {
+            memcpy_P(buf, ptr, size);
+            ptr += size;
+            return size;
+        }
+};
+
+}
+
 namespace PicoMQTT {
 
 Server::Client::Client(Server & server, ::Client * client)
@@ -345,6 +402,26 @@ Publisher::Publish Server::begin_publish(const char * topic, const size_t payloa
 void Server::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
     fire_message_callbacks(topic, packet);
+}
+
+bool ServerLocalSubscribe::publish(const char * topic, const void * payload, const size_t payload_size,
+                                   uint8_t qos, bool retain, uint16_t message_id) {
+    TRACE_FUNCTION
+    const bool ret = Server::publish(topic, payload, payload_size, qos, retain, message_id);
+    BufferClient buffer(payload);
+    IncomingPacket packet(IncomingPacket::PUBLISH, 0, payload_size, buffer);
+    fire_message_callbacks(topic, packet);
+    return ret;
+}
+
+bool ServerLocalSubscribe::publish_P(const char * topic, PGM_P payload, const size_t payload_size,
+                                     uint8_t qos, bool retain, uint16_t message_id) {
+    TRACE_FUNCTION
+    const bool ret = Server::publish_P(topic, payload, payload_size, qos, retain, message_id);
+    BufferClientP buffer((void *) payload);
+    IncomingPacket packet(IncomingPacket::PUBLISH, 0, payload_size, buffer);
+    fire_message_callbacks(topic, packet);
+    return ret;
 }
 
 }

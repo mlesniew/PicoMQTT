@@ -50,7 +50,7 @@ void loop() {
         mqtt.publish_P("picomqtt/flash_string/global", flash_string);
 
         // The topic can be an F-string too:
-        // mqtt.publish_P(F("picomqtt/flash_string/global"), flash_string);
+        mqtt.publish_P(F("picomqtt/flash_string/global"), flash_string);
 
         // publish binary data
         const char binary_payload[] = "This string could contain binary data including a zero byte";

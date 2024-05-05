@@ -214,4 +214,17 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
         std::list<std::unique_ptr<Client>> clients;
 };
 
+class ServerLocalSubscribe: public Server {
+    public:
+        using Server::Server;
+        using Server::publish;
+        using Server::publish_P;
+
+        virtual bool publish(const char * topic, const void * payload, const size_t payload_size,
+                             uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
+
+        virtual bool publish_P(const char * topic, PGM_P payload, const size_t payload_size,
+                               uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
+};
+
 }
