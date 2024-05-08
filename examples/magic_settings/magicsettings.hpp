@@ -4,7 +4,6 @@
 #include <PicoMQTT.h>
 #include <Preferences.h>
 
-
 // These methods convert a MQTT message payload string to different types.  The 2nd param must be a non-const reference.
 // TODO: Find a way to return the parsed value
 
@@ -103,6 +102,7 @@ class MagicSettings {
 
         virtual void begin() = 0;
         virtual void publish() = 0;
+        virtual const String &var_name() = 0;
     };
 
     template <typename T>
@@ -173,6 +173,11 @@ class MagicSettings {
             }
             return other;
         }
+
+        const String &var_name() {
+            return name;
+        }
+
         std::function<void()> change_callback;
 
         const String name;
@@ -213,7 +218,6 @@ class MagicSettings {
             defaults();
         });
     }
-
 
     // publish everything within this namespace
     void publish() {

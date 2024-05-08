@@ -1,8 +1,22 @@
+// dependencies: https://github.com/mlesniew/PicoWebsocket.git bblanchon/ArduinoJson m5stack/M5Unified
+// platform compatibility: espressif32
+
 #include <M5Unified.h>
 #include <PicoMQTT.h>
 #include <PicoWebsocket.h>
-
 #include "magicsettings.hpp"
+
+#if __has_include("config.h")
+#include "config.h"
+#endif
+
+#ifndef WIFI_SSID
+#define WIFI_SSID "WiFi SSID"
+#endif
+
+#ifndef WIFI_PASSWORD
+#define WIFI_PASSWORD "password"
+#endif
 
 void on_fparam_change(void);
 
@@ -37,6 +51,7 @@ void setup() {
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);
     }
+    delay(1000);
     Serial.printf("WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
 
     mqtt.begin();

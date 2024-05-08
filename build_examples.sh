@@ -24,8 +24,8 @@ fi
 
 find examples -mindepth 1 -type d | cut -d/ -f2 | sort | while read -r EXAMPLE
 do
-	COMPATIBLE_PLATFORMS="$(grep -hoiE 'platform compatibility:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1)"
-	DEPENDENCIES="$(grep -hoiE 'dependencies:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1)"
+	COMPATIBLE_PLATFORMS="$(grep -hoiE 'platform compatibility:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1 )"
+	DEPENDENCIES="$(grep -hoiE 'dependencies:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1 |sed 's/ /\n\t/g')"
 	echo "$EXAMPLE:$COMPATIBLE_PLATFORMS"
 	if [ -n "$COMPATIBLE_PLATFORMS" ] && ! echo "$COMPATIBLE_PLATFORMS" | grep -qFiw "$PLATFORM"
 	then
@@ -42,7 +42,7 @@ do
 		echo "upload_speed = 921600"  >> platformio.ini
 		if [ -n "$DEPENDENCIES" ]
 		then
-			echo "lib_deps = $DEPENDENCIES" >> platformio.ini
+			echo "lib_deps = \t$DEPENDENCIES" >> platformio.ini
 		fi
 	fi
 	ln -s -f -t src/ "$ROOT_DIR/examples/$EXAMPLE/"*
