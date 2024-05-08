@@ -281,7 +281,7 @@ void Client::on_disconnect() {
     TRACE_FUNCTION
     BasicClient::on_disconnect();
     if (disconnected_callback) {
-        connected_callback();
+        disconnected_callback();
     }
 }
 
