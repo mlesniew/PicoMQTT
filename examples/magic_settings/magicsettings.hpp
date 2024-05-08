@@ -29,23 +29,23 @@ static inline void load_from_string(const String & payload, bool & value) {
 
 
 // These methods convert different types to a MQTT payload
-String store_to_string(const String & value) {
+static inline String store_to_string(const String & value) {
     return value;
 }
 
-String store_to_string(const int & value) {
+static inline String store_to_string(const int & value) {
     return String(value);
 }
 
-String store_to_string(const double & value) {
+static inline String store_to_string(const double & value) {
     return String(value);
 }
 
-String store_to_string(const float & value) {
+static inline String store_to_string(const float & value) {
     return String(value);
 }
 
-String store_to_string(const bool & value) {
+static inline String store_to_string(const bool & value) {
     return String((int)value);
 }
 
