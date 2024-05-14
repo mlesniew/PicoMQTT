@@ -55,7 +55,7 @@ void loop() {
         Serial.printf("Publishing in topic '%s'...\n", topic.c_str());
 
         // build JSON document
-        StaticJsonDocument<1024> json;
+        JsonDocument json;
         json["foo"] = "bar";
         json["millis"] = millis();
 
