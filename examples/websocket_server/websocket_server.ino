@@ -1,4 +1,4 @@
-// dependencies: https://github.com/mlesniew/PicoWebsocket.git
+// dependencies: mlesniew/PicoWebsocket
 
 #include <PicoMQTT.h>
 #include <PicoWebsocket.h>
