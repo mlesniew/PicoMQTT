@@ -1,6 +1,11 @@
 #pragma once
 
+#include "config.h"
+
 #include <Arduino.h>
+#ifdef PICOMQTT_MULTITHREADED
+#include <mutex>
+#endif
 
 #include "connection.h"
 #include "incoming_packet.h"
@@ -106,6 +111,12 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
         virtual void on_connect() override;
         virtual void on_disconnect() override;
 
+#ifdef PICOMQTT_MULTITHREADED
+        using BasicClient::begin_publish;
+        virtual Publish begin_publish(const char * topic, const size_t payload_size,
+                                      uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override;
+#endif
+
     protected:
         Client(ClientSocketInterface * client,
                const char * host, uint16_t port, const char * id, const char * user, const char * password,
@@ -114,6 +125,9 @@ class Client: public SocketOwner<std::unique_ptr<ClientSocketInterface>>, public
         unsigned long last_reconnect_attempt;
         virtual void on_message(const char * topic, IncomingPacket & packet) override;
 
+#ifdef PICOMQTT_MULTITHREADED
+        std::mutex mutex;
+#endif
 };
 
 }

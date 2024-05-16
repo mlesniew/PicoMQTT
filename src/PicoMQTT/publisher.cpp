@@ -6,13 +6,15 @@ namespace PicoMQTT {
 Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
                             uint8_t flags, size_t total_size,
                             const char * topic, size_t topic_size,
-                            uint16_t message_id)
+                            uint16_t message_id,
+                            std::unique_lock<std::mutex> && lock)
     :
     OutgoingPacket(this->print, Packet::PUBLISH, flags, total_size),
     qos((flags >> 1) & 0b11),
     message_id(message_id),
     print(print),
-    publisher(publisher) {
+    publisher(publisher),
+    lock(std::move(lock)) {
     TRACE_FUNCTION
 
     OutgoingPacket::write_header();
@@ -24,23 +26,27 @@ Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
 
 Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
                             const char * topic, size_t topic_size, size_t payload_size,
-                            uint8_t qos, bool retain, bool dup, uint16_t message_id)
+                            uint8_t qos, bool retain, bool dup, uint16_t message_id,
+                            std::unique_lock<std::mutex> && lock)
     : Publish(
           publisher, print,
           (dup ? 0b1000 : 0) | ((qos & 0b11) << 1) | (retain ? 1 : 0),  // flags
           2 + topic_size + (qos ? 2 : 0) + payload_size,  // total size
           topic, topic_size,  // topic
-          message_id) {
+          message_id,
+          std::move(lock)) {
     TRACE_FUNCTION
 }
 
 Publisher::Publish::Publish(Publisher & publisher, const PrintMux & print,
                             const char * topic, size_t payload_size,
-                            uint8_t qos, bool retain, bool dup, uint16_t message_id)
+                            uint8_t qos, bool retain, bool dup, uint16_t message_id,
+                            std::unique_lock<std::mutex> && lock)
     : Publish(
           publisher, print,
           topic, strlen(topic), payload_size,
-          qos, retain, dup, message_id) {
+          qos, retain, dup, message_id,
+          std::move(lock)) {
     TRACE_FUNCTION
 }
 

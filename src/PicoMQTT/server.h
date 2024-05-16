@@ -1,7 +1,12 @@
 #pragma once
 
+#include "config.h"
+
 #include <list>
 #include <set>
+#ifdef PICOMQTT_MULTITHREADED
+#include <mutex>
+#endif
 
 #include <Arduino.h>
 
@@ -212,6 +217,10 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
 
         std::unique_ptr<ServerSocketInterface> server;
         std::list<std::unique_ptr<Client>> clients;
+
+#ifdef PICOMQTT_MULTITHREADED
+        std::mutex mutex;
+#endif
 };
 
 }

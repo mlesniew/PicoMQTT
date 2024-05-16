@@ -1,6 +1,11 @@
 #pragma once
 
+#include "config.h"
+
 #include <cstring>
+#ifdef PICOMQTT_MULTITHREADED
+#include <mutex>
+#endif
 
 #include <Arduino.h>
 
@@ -17,16 +22,21 @@ class Publisher {
                 Publish(Publisher & publisher, const PrintMux & print,
                         uint8_t flags, size_t total_size,
                         const char * topic, size_t topic_size,
-                        uint16_t message_id);
+                        uint16_t message_id,
+                        std::unique_lock<std::mutex> && lock);
 
             public:
                 Publish(Publisher & publisher, const PrintMux & print,
                         const char * topic, size_t topic_size, size_t payload_size,
-                        uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0);
+                        uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0,
+                        std::unique_lock<std::mutex> && lock = std::unique_lock<std::mutex>());
 
                 Publish(Publisher & publisher, const PrintMux & print,
                         const char * topic, size_t payload_size,
-                        uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0);
+                        uint8_t qos = 0, bool retain = false, bool dup = false, uint16_t message_id = 0,
+                        std::unique_lock<std::mutex> && lock = std::unique_lock<std::mutex>());
+
+                Publish(Publish && publish) = default;
 
                 ~Publish();
 
@@ -36,6 +46,11 @@ class Publisher {
                 const uint16_t message_id;
                 PrintMux print;
                 Publisher & publisher;
+
+#ifdef PICOMQTT_MULTITHREADED
+            protected:
+                std::unique_lock<std::mutex> lock;
+#endif
         };
 
         virtual Publish begin_publish(const char * topic, const size_t payload_size,

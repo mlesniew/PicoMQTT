@@ -233,6 +233,10 @@ void Client::on_message(const char * topic, IncomingPacket & packet) {
 
 void Client::loop() {
     TRACE_FUNCTION
+#ifdef PICOMQTT_MULTITHREADED
+    std::unique_lock<std::mutex> lock(mutex);
+#endif
+
     if (!client.connected()) {
         if (host.isEmpty() || !port) {
             return;
@@ -284,5 +288,23 @@ void Client::on_disconnect() {
         disconnected_callback();
     }
 }
+
+#ifdef PICOMQTT_MULTITHREADED
+Publisher::Publish Client::begin_publish(const char * topic, const size_t payload_size,
+                           uint8_t qos, bool retain, uint16_t message_id) {
+    TRACE_FUNCTION
+    std::unique_lock<std::mutex> lock(mutex);
+    return Publish(
+               *this,
+               client.connected() ? client : PrintMux(),
+               topic, payload_size,
+               (qos >= 1) ? 1 : 0,
+               retain,
+               message_id,  // dup if message_id is non-zero
+               message_id ? message_id : message_id_generator.generate(),  // generate only if message_id == 0
+               std::move(lock)
+           );
+}
+#endif
 
 }

@@ -300,11 +300,17 @@ Server::Server(std::unique_ptr<ServerSocketInterface> server)
 
 void Server::begin() {
     TRACE_FUNCTION
+#ifdef PICOMQTT_MULTITHREADED
+    std::unique_lock<std::mutex> lock(mutex);
+#endif
     server->begin();
 }
 
 void Server::loop() {
     TRACE_FUNCTION
+#ifdef PICOMQTT_MULTITHREADED
+    std::unique_lock<std::mutex> lock(mutex);
+#endif
 
     ::Client * client_ptr = server->accept_client();
     if (client_ptr) {
@@ -339,7 +345,10 @@ PrintMux Server::get_subscribed(const char * topic) {
 Publisher::Publish Server::begin_publish(const char * topic, const size_t payload_size,
         uint8_t, bool, uint16_t) {
     TRACE_FUNCTION
-    return Publish(*this, get_subscribed(topic), topic, payload_size);
+#ifdef PICOMQTT_MULTITHREADED
+    std::unique_lock<std::mutex> lock(mutex);
+#endif
+    return Publish(*this, get_subscribed(topic), topic, payload_size, 0, false, false, 0, std::move(lock));
 }
 
 void Server::on_message(const char * topic, IncomingPacket & packet) {
