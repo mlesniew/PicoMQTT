@@ -139,7 +139,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & t
     TRACE_FUNCTION
     return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
         callback(topic, (char *) payload);
-    });
+    }, max_size);
 }
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
@@ -147,7 +147,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & t
     TRACE_FUNCTION
     return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
         callback((char *) payload);
-    });
+    }, max_size);
 }
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & topic_filter,
@@ -155,7 +155,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(const String & t
     TRACE_FUNCTION
     return subscribe(topic_filter, [callback](char * topic, void * payload, size_t payload_size) {
         callback(payload, payload_size);
-    });
+    }, max_size);
 }
 
 };
