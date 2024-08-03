@@ -41,7 +41,7 @@ class FunctionTracer {
 
 }
 
-#define TRACE_FUNCTION FunctionTracer _function_tracer(__PRETTY_FUNCTION__);
+#define TRACE_FUNCTION PicoMQTT::FunctionTracer _function_tracer(__PRETTY_FUNCTION__);
 
 #else
 
