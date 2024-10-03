@@ -217,8 +217,9 @@ last_reconnect_attempt(millis() - reconnect_interval_millis) {
 
 Client::SubscriptionId Client::subscribe(const String & topic_filter, MessageCallback callback) {
     TRACE_FUNCTION
+    const auto ret = SubscribedMessageListener::subscribe(topic_filter, callback);
     BasicClient::subscribe(topic_filter);
-    return SubscribedMessageListener::subscribe(topic_filter, callback);
+    return ret;
 }
 
 void Client::unsubscribe(const String & topic_filter) {
