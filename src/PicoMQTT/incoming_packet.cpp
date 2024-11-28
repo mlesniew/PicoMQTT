@@ -44,6 +44,19 @@ int IncomingPacket::connect(const char * host, uint16_t port) {
     return 0;
 }
 
+
+#ifdef PICOMQTT_EXTRA_CONNECT_METHODS
+int IncomingPacket::connect(IPAddress ip, uint16_t port, int32_t timeout) {
+    TRACE_FUNCTION;
+    return 0;
+}
+
+int IncomingPacket::connect(const char * host, uint16_t port, int32_t timeout) {
+    TRACE_FUNCTION;
+    return 0;
+}
+#endif
+
 size_t IncomingPacket::write(const uint8_t * buffer, size_t size) {
     TRACE_FUNCTION
     return 0;

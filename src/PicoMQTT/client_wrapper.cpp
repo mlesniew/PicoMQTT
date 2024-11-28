@@ -122,6 +122,20 @@ int ClientWrapper::connect(const char * host, uint16_t port) {
     return client.connect(host, port);
 }
 
+#ifdef PICOMQTT_EXTRA_CONNECT_METHODS
+
+int ClientWrapper::connect(IPAddress ip, uint16_t port, int32_t timeout) {
+    TRACE_FUNCTION
+    return client.connect(ip, port, timeout);
+}
+
+int ClientWrapper::connect(const char * host, uint16_t port, int32_t timeout) {
+    TRACE_FUNCTION
+    return client.connect(host, port, timeout);
+}
+
+#endif
+
 int ClientWrapper::available() {
     TRACE_FUNCTION
     return client.available();

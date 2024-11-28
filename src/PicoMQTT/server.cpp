@@ -11,6 +11,10 @@ class BufferClient: public ::Client {
         // these methods are nop dummies
         virtual int connect(IPAddress ip, uint16_t port) override final { TRACE_FUNCTION return 0; }
         virtual int connect(const char * host, uint16_t port) override final { TRACE_FUNCTION return 0; }
+#ifdef PICOMQTT_EXTRA_CONNECT_METHODS
+        virtual int connect(IPAddress ip, uint16_t port, int32_t timeout) override final { TRACE_FUNCTION return 0; }
+        virtual int connect(const char * host, uint16_t port, int32_t timeout) override final { TRACE_FUNCTION return 0; }
+#endif
         virtual size_t write(const uint8_t * buffer, size_t size) override final { TRACE_FUNCTION return 0; }
         virtual size_t write(uint8_t value) override final { TRACE_FUNCTION return 0; }
         virtual void flush() override final { TRACE_FUNCTION }
