@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <Client.h>
 
+#include "config.h"
 #include "packet.h"
 
 namespace PicoMQTT {
@@ -21,6 +22,10 @@ class IncomingPacket: public Packet, public Client {
         virtual int available() override;
         virtual int connect(IPAddress ip, uint16_t port) override;
         virtual int connect(const char * host, uint16_t port) override;
+#ifdef PICOMQTT_EXTRA_CONNECT_METHODS
+        virtual int connect(IPAddress ip, uint16_t port, int32_t timeout) override;
+        virtual int connect(const char * host, uint16_t port, int32_t timeout) override;
+#endif
         virtual int peek() override;
         virtual int read() override;
         virtual int read(uint8_t * buf, size_t size) override;

@@ -2,6 +2,8 @@
 
 #include <WiFiClient.h>
 
+#include "config.h"
+
 namespace PicoMQTT {
 
 class ClientWrapper: public ::Client {
@@ -18,6 +20,10 @@ class ClientWrapper: public ::Client {
         // all of the below call the corresponding method on this->client
         virtual int connect(IPAddress ip, uint16_t port) override;
         virtual int connect(const char * host, uint16_t port) override;
+#ifdef PICOMQTT_EXTRA_CONNECT_METHODS
+        virtual int connect(IPAddress ip, uint16_t port, int32_t timeout) override;
+        virtual int connect(const char * host, uint16_t port, int32_t timeout) override;
+#endif
         virtual int available() override;
         virtual void flush() override;
         virtual void stop() override;

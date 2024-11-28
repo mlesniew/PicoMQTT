@@ -24,8 +24,15 @@ fi
 
 find examples -mindepth 1 -type d | cut -d/ -f2 | sort | while read -r EXAMPLE
 do
-	COMPATIBLE_PLATFORMS="$(grep -hoiE 'platform compatibility:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1)"
-	DEPENDENCIES="$(grep -hoiE 'dependencies:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1)"
+	REQUIRED_PLATFORM="$(grep -hoiE 'platform:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1 | tr -d ' ')"
+	if [ -z "$REQUIRED_PLATFORM" ]
+	then
+		COMPATIBLE_PLATFORMS="$(grep -hoiE 'platform compatibility:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1)"
+	else
+		COMPATIBLE_PLATFORMS="$(echo $REQUIRED_PLATFORM | cut -d'@' -f1)"
+	fi
+	FILESYSTEM="$(grep -hoiE 'filesystem:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1)"
+	DEPENDENCIES="$(grep -hoiE 'dependencies:.*' "$ROOT_DIR/examples/$EXAMPLE/"* | cut -d: -f2- | head -n1 | xargs -r -n1 printf '\n    %s')"
 	echo "$EXAMPLE:$COMPATIBLE_PLATFORMS"
 	if [ -n "$COMPATIBLE_PLATFORMS" ] && ! echo "$COMPATIBLE_PLATFORMS" | grep -qFiw "$PLATFORM"
 	then
@@ -44,12 +51,28 @@ do
 		then
 			echo "lib_deps = $DEPENDENCIES" >> platformio.ini
 		fi
+		if [ -n "$PLATFORM_OVERRIDE" ]
+		then
+			sed -E -i "s#^platform *=.*#platform = $PLATFORM_OVERRIDE#" platformio.ini
+		elif [ -n "$REQUIRED_PLATFORM" ]
+		then
+			sed -E -i "s#^platform *=.*#platform = $REQUIRED_PLATFORM#" platformio.ini
+		fi
+		if [ -n "$FILESYSTEM" ]
+		then
+			echo "board_build.filesystem = $FILESYSTEM" >> platformio.ini
+		fi
 	fi
+
 	ln -s -f -t src/ "$ROOT_DIR/examples/$EXAMPLE/"*
 	ln -s -f -t lib/ "$ROOT_DIR"
 	if [ -e "$ROOT_DIR/config.h" ]
 	then
 		ln -s -f -t src/ "$ROOT_DIR/config.h"
+	fi
+	if [ -d "$ROOT_DIR/examples/$EXAMPLE/data" ]
+	then
+		ln -s -f -t ./ "$ROOT_DIR/examples/$EXAMPLE/data"
 	fi
 	pio run
 	popd
