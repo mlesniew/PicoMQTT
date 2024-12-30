@@ -25,7 +25,7 @@ jobs:
           - board: esp32dev
             platform_override: espressif32@6.9.0
           - board: esp32dev
-            platform_override: https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10-rc3/platform-espressif32.zip 
+            platform_override: https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +35,7 @@ jobs:
             ~/.cache/pip
             ~/.platformio/.cache
           key: ${{ runner.os }}-pio
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.9'
       - name: Install jq
