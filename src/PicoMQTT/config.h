@@ -27,9 +27,9 @@
 #endif
 
 #ifdef ESP32
-#if ESP_ARDUINO_VERSION >= ESP_ARDUINO_VERSION_VAL(3, 1, 0)
-#define PICOMQTT_EXTRA_CONNECT_METHODS
-#endif
+// Uncomment this define to make PicoMQTT compatible with framework variants
+// which have extra Client::connect methods which accept a timeout parameter.
+// #define PICOMQTT_EXTRA_CONNECT_METHODS
 #endif
 
 // #define PICOMQTT_DEBUG

@@ -1,4 +1,4 @@
-// dependencies: mlesniew/PicoWebsocket@1.1.0
+// dependencies: mlesniew/PicoWebsocket@1.2.0
 
 #include <PicoMQTT.h>
 #include <PicoWebsocket.h>
