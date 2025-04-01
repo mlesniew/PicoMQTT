@@ -2,6 +2,9 @@
 
 #include <list>
 #include <set>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <Arduino.h>
 
@@ -165,6 +168,14 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
                 Publish & publish;
         };
 
+        struct RetainedMessage {
+            std::vector<uint8_t> payload;
+            uint8_t qos;
+
+            RetainedMessage(const std::vector<uint8_t> & payload_data, uint8_t qos_level)
+                : payload(payload_data), qos(qos_level) {}
+        };
+
         Server(std::unique_ptr<ServerSocketInterface> socket);
 
         Server(uint16_t port = 1883)
@@ -194,6 +205,8 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
         unsigned long socket_timeout_millis;
 
     protected:
+        std::unordered_map<std::string, RetainedMessage> retained_messages; // topic mapping to RetainedMessage
+
         Server(ServerSocketInterface * socket)
             : Server(std::unique_ptr<ServerSocketInterface>(socket)) {
             TRACE_FUNCTION
@@ -205,7 +218,7 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
         virtual void on_connected(const char * client_id) {}
         virtual void on_disconnected(const char * client_id) {}
 
-        virtual void on_subscribe(const char * client_id, const char * topic) {}
+        virtual void on_subscribe(const char * client_id, const char * topic);
         virtual void on_unsubscribe(const char * client_id, const char * topic) {}
 
         virtual PrintMux get_subscribed(const char * topic);
