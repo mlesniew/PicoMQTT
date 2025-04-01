@@ -182,7 +182,10 @@ void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
 
     const size_t payload_size = packet.get_remaining_size();
-    auto publish = server.begin_publish(topic, payload_size, packet.get_flags());
+    const uint8_t flags = packet.get_flags();
+    const uint8_t qos = (flags >> 1) & 0b11;
+    const bool retain = flags & 0b1;
+    auto publish = server.begin_publish(topic, payload_size, qos, retain);
 
     // Always notify the server about the message
     {
@@ -237,6 +240,7 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
 
     for (const String & topic : subscribed_topics) {
         server.on_subscribe(client_id.c_str(), topic.c_str());
+        this->on_subscribed(topic);
     }
 }
 
@@ -391,26 +395,6 @@ void Server::loop() {
     }
 }
 
-void Server::on_subscribe(const char * client_id, const char * topic) {
-    TRACE_FUNCTION
-    // Send applicable retained messages to new subscribers
-    for (auto & client_ptr : clients) {
-        if (strcmp(client_ptr->get_client_id(), client_id) == 0) {
-            for (auto & retained : retained_messages) {
-                const auto & retained_topic = retained.first;
-                const char * ret_topic = retained_topic.c_str();
-                const auto & retained_msg = retained.second;
-                if (topic_matches(topic, ret_topic)) {
-                    auto pub = Publish(*this, PrintMux(client_ptr->get_print()), ret_topic, retained_msg.payload.size(), 0, true, 0);
-                    pub.write(retained_msg.payload.data(), retained_msg.payload.size());
-                    pub.send();
-                }
-            }
-            break;
-        }
-    }
-}
-
 PrintMux Server::get_subscribed(const char * topic) {
     TRACE_FUNCTION
     PrintMux ret;
@@ -423,32 +407,13 @@ PrintMux Server::get_subscribed(const char * topic) {
 }
 
 Publisher::Publish Server::begin_publish(const char * topic, const size_t payload_size,
-        uint8_t flags, bool, uint16_t) {
+        uint8_t qos, bool retain, uint16_t) {
     TRACE_FUNCTION
-    // const uint8_t qos = (flags >> 1) & 0b11;
-    const bool retain = flags & 0b1;
-    return Publish(*this, get_subscribed(topic), topic, payload_size, 0 /* qos */, retain);
+    return Publish(*this, get_subscribed(topic), topic, payload_size, qos, retain);
 }
 
 void Server::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
-    const bool retain = packet.get_flags() & 0b1;
-    if (retain) {
-        const uint8_t qos = (packet.get_flags() >> 1) & 0b11;
-        // Extract remaining payload
-        std::vector<uint8_t> payload;
-        payload.reserve(packet.get_remaining_size());
-        uint8_t byte;
-        while (byte = packet.read_u8()) {
-            payload.push_back(byte);
-        }
-
-        if (payload.empty()) {
-            retained_messages.erase(topic);
-        } else {
-            retained_messages.insert_or_assign(topic, RetainedMessage(payload, qos));
-        }
-    }
     fire_message_callbacks(topic, packet);
 }
 
