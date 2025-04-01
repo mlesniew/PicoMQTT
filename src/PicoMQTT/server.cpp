@@ -182,7 +182,7 @@ void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
 
     const size_t payload_size = packet.get_remaining_size();
-    auto publish = server.begin_publish(topic, payload_size);
+    auto publish = server.begin_publish(topic, payload_size, packet.get_flags());
 
     // Always notify the server about the message
     {
@@ -398,9 +398,11 @@ PrintMux Server::get_subscribed(const char * topic) {
 }
 
 Publisher::Publish Server::begin_publish(const char * topic, const size_t payload_size,
-        uint8_t, bool, uint16_t) {
+        uint8_t flags, bool, uint16_t) {
     TRACE_FUNCTION
-    return Publish(*this, get_subscribed(topic), topic, payload_size);
+    // const uint8_t qos = (flags >> 1) & 0b11;
+    const bool retain = flags & 0b1;
+    return Publish(*this, get_subscribed(topic), topic, payload_size, 0 /* qos */, retain);
 }
 
 void Server::on_message(const char * topic, IncomingPacket & packet) {
