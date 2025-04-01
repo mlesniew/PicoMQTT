@@ -203,6 +203,7 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
     }
 
     std::list<uint8_t> suback_codes;
+    std::vector<String> subscribed_topics;
 
     while (subscribe.get_remaining_size()) {
         const size_t topic_size = subscribe.read_u16();
@@ -222,8 +223,8 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
                 return;
             }
             this->subscribe(topic);
-            server.on_subscribe(client_id.c_str(), topic);
             suback_codes.push_back(0);
+            subscribed_topics.push_back(topic);
         }
     }
 
@@ -233,6 +234,10 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
         suback.write_u8(code);
     }
     suback.send();
+
+    for (const String & topic : subscribed_topics) {
+        server.on_subscribe(client_id.c_str(), topic.c_str());
+    }
 }
 
 void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
