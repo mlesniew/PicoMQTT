@@ -7,8 +7,12 @@
 #include "config.h"
 #include "packet.h"
 
+#if defined(ARDUINO_ARCH_MBED_GIGA)
+#include <api/Client.h>
+#else
 class Print;
 class Client;
+#endif
 
 #if PICOMQTT_OUTGOING_BUFFER_SIZE == 0
 #define PICOMQTT_UNBUFFERED

@@ -4,6 +4,10 @@
 #include "debug.h"
 #include "outgoing_packet.h"
 
+#if defined(ARDUINO_ARCH_MBED_GIGA)
+#define memcpy_P memcpy
+#endif
+
 namespace PicoMQTT {
 
 OutgoingPacket::OutgoingPacket(Print & print, Packet::Type type, uint8_t flags, size_t payload_size)

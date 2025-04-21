@@ -9,6 +9,9 @@
 #include <WiFi.h>
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#elif defined(ARDUINO_ARCH_MBED_GIGA)
+#include <WiFi.h>
+#include <api/Client.h>
 #else
 #error "This board is not supported."
 #endif
