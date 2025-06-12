@@ -26,6 +26,8 @@ jobs:
             platform_override: espressif32@6.9.0
           - board: esp32dev
             platform_override: https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip
+          - board: giga_r1_m7
+            platform_override: 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
