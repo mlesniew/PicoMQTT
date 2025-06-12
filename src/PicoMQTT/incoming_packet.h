@@ -1,7 +1,11 @@
 #pragma once
 
 #include <Arduino.h>
+#if defined(ARDUINO_ARCH_MBED_GIGA)
+#include <api/Client.h>
+#else
 #include <Client.h>
+#endif
 
 #include "config.h"
 #include "packet.h"
