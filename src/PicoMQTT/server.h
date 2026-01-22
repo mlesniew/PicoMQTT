@@ -20,6 +20,7 @@
 #include "subscriber.h"
 #include "pico_interface.h"
 #include "utils.h"
+#include "server_retained.h"
 
 namespace PicoMQTT {
 
@@ -147,6 +148,7 @@ class Server: public PicoMQTTInterface, public Publisher, public SubscribedMessa
                 std::set<Subscription> subscriptions;
 
                 virtual void on_subscribe(IncomingPacket & packet);
+                virtual void on_subscribed(const String & topic_filter) {}
                 virtual void on_unsubscribe(IncomingPacket & packet);
 
                 virtual void handle_packet(IncomingPacket & packet) override;

@@ -8,7 +8,7 @@ import paho.mqtt.client as mqtt
 
 def consumer(barrier, conn, host, expected_messages, timeout):
     pid = multiprocessing.current_process().pid
-    client = mqtt.Client(f"consumer_{pid}")
+    client = mqtt.Client(client_id=f"consumer_{pid}")
     # client.username_pw_set("username", "password")
 
     total_messages = 0
@@ -52,7 +52,7 @@ parser.add_argument("--timeout", type=int, default=10)
 
 args = parser.parse_args()
 
-client = mqtt.Client("producer")
+client = mqtt.Client(client_id="producer")
 client.connect(args.host)
 
 barrier = multiprocessing.Barrier(args.consumers + 1)

@@ -182,7 +182,10 @@ void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
 
     const size_t payload_size = packet.get_remaining_size();
-    auto publish = server.begin_publish(topic, payload_size);
+    const uint8_t flags = packet.get_flags();
+    const uint8_t qos = (flags >> 1) & 0b11;
+    const bool retain = flags & 0b1;
+    auto publish = server.begin_publish(topic, payload_size, qos, retain);
 
     // Always notify the server about the message
     {
@@ -203,6 +206,7 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
     }
 
     std::list<uint8_t> suback_codes;
+    std::vector<String> subscribed_topics;
 
     while (subscribe.get_remaining_size()) {
         const size_t topic_size = subscribe.read_u16();
@@ -222,8 +226,8 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
                 return;
             }
             this->subscribe(topic);
-            server.on_subscribe(client_id.c_str(), topic);
             suback_codes.push_back(0);
+            subscribed_topics.push_back(topic);
         }
     }
 
@@ -233,6 +237,11 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
         suback.write_u8(code);
     }
     suback.send();
+
+    for (const String & topic : subscribed_topics) {
+        server.on_subscribe(client_id.c_str(), topic.c_str());
+        this->on_subscribed(topic);
+    }
 }
 
 void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
@@ -398,9 +407,9 @@ PrintMux Server::get_subscribed(const char * topic) {
 }
 
 Publisher::Publish Server::begin_publish(const char * topic, const size_t payload_size,
-        uint8_t, bool, uint16_t) {
+        uint8_t qos, bool retain, uint16_t) {
     TRACE_FUNCTION
-    return Publish(*this, get_subscribed(topic), topic, payload_size);
+    return Publish(*this, get_subscribed(topic), topic, payload_size, qos, retain);
 }
 
 void Server::on_message(const char * topic, IncomingPacket & packet) {

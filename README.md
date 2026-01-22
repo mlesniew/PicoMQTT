@@ -12,6 +12,7 @@ Features:
 * Works in client and broker mode
 * Implements [MQTT 3.1.1](https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html)
 * Supports publishing and consuming of [arbitrary sized messages](#arbitrary-sized-messages)
+* Supports retained messages (in-memory only, no persistence)
 * High performance -- the broker can deliver thousands of messages per second -- [see benchmarks](#benchmarks)
 * Works on [WiFi, Ethernet and more](#custom-server-and-client-types)
 * Supports connections over [websockets](#websocket-support)
@@ -21,7 +22,7 @@ Features:
 
 Limitations:
 * Client only supports MQTT QoS levels 0 and 1
-* Broker only supports MQTT QoS level 0, ignores will and retained messages.
+* Broker only supports MQTT QoS level 0, ignores last-will and testament (LWT) messages.
 * Currently only ESP8266 and ESP32 boards are supported
 
 
