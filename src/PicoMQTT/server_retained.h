@@ -24,15 +24,16 @@ public:
 
     // Override publish to capture retained messages from local publishes
     using BaseServer::publish;
-    virtual bool publish(const char * topic, const void * payload, const size_t payload_size,
-                         uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override {
+    bool publish(const char * topic, const void * payload, const size_t payload_size,
+                 uint8_t qos = 0, bool retain = false, uint16_t message_id = 0) override {
+        TRACE_FUNCTION
         if (retain) {
             if (payload_size == 0) {
                 // Empty payload clears the retained message
                 retained_messages.erase(topic);
             } else {
                 // Store the retained message
-                const uint8_t * data = static_cast<const uint8_t *>(payload);
+                auto data = static_cast<const uint8_t *>(payload);
                 std::vector<uint8_t> payload_vec(data, data + payload_size);
                 retained_messages.insert_or_assign(topic, RetainedMessage(std::move(payload_vec), qos));
             }
@@ -43,7 +44,7 @@ public:
     // Override subscribe to deliver retained messages for local subscriptions
     // This works with ServerLocalSubscribe which fires callbacks via publish()
     using BaseServer::subscribe;
-    virtual Subscriber::SubscriptionId subscribe(const String & topic_filter, typename SubscribedMessageListener::MessageCallback callback) override {
+    Subscriber::SubscriptionId subscribe(const String & topic_filter, typename SubscribedMessageListener::MessageCallback callback) override {
         auto id = BaseServer::subscribe(topic_filter, callback);
 
         // Deliver retained messages matching this subscription via publish()
@@ -90,20 +91,20 @@ public:
                 capture_buffer.reserve(get_remaining_size());
             }
 
-            ~CapturingIncomingPublish() {
+            ~CapturingIncomingPublish() noexcept {
                 TRACE_FUNCTION
                 // Copy any remaining bytes
                 const size_t remaining = get_remaining_size();
                 for (size_t i = 0; i < remaining; ++i) {
                     const int byte = IncomingPacket::read();
                     if (byte >= 0) {
-                        capture_buffer.push_back((uint8_t)byte);
-                        publish.write((uint8_t)byte);
+                        capture_buffer.push_back(static_cast<uint8_t>(byte));
+                        publish.write(static_cast<uint8_t>(byte));
                     }
                 }
             }
 
-            virtual int read(uint8_t * buf, size_t size) override {
+            int read(uint8_t * buf, size_t size) override {
                 TRACE_FUNCTION
                 const int ret = IncomingPacket::read(buf, size);
                 if (ret > 0) {
@@ -113,12 +114,12 @@ public:
                 return ret;
             }
 
-            virtual int read() override {
+            int read() override {
                 TRACE_FUNCTION
                 const int ret = IncomingPacket::read();
                 if (ret >= 0) {
-                    capture_buffer.push_back((uint8_t)ret);
-                    publish.write((uint8_t)ret);
+                    capture_buffer.push_back(static_cast<uint8_t>(ret));
+                    publish.write(static_cast<uint8_t>(ret));
                 }
                 return ret;
             }
@@ -164,7 +165,7 @@ public:
         }
 
         // Override on_subscribed to send retained messages on subscribe
-        virtual void on_subscribed(const String & topic_filter) override {
+        void on_subscribed(const String & topic_filter) override {
             TRACE_FUNCTION
             BaseServer::Client::on_subscribed(topic_filter);
 
