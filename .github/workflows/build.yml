@@ -1,0 +1,35 @@
+name: Build Examples
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  discover-examples:
+    runs-on: ubuntu-latest
+    outputs:
+      examples: ${{ steps.find-examples.outputs.examples }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Discover examples
+        id: find-examples
+        run: |
+          examples=$(find examples -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -R . | jq -s . | jq -c .)
+          echo "examples=$examples" >> $GITHUB_OUTPUT
+
+  build:
+    needs: discover-examples
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example: ${{ fromJson(needs.discover-examples.outputs.examples) }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.9'
+      - name: Install PlatformIO Core
+        run: pip install -U platformio intelhex
+      - name: Build ${{ matrix.example }}
+        run: platformio run -d examples/${{ matrix.example }}

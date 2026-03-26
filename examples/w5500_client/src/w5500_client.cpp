@@ -1,5 +1,3 @@
-// Platform compatibility: espressif8266
-
 #include <Arduino.h>
 #include <Ethernet.h>
 

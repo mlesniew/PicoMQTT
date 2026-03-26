@@ -1,5 +1,3 @@
-// dependencies: mlesniew/PicoWebsocket
-
 #include <PicoMQTT.h>
 #include <PicoWebsocket.h>
 
@@ -15,15 +13,9 @@
 #define WIFI_PASSWORD "password"
 #endif
 
-// regular tcp server on port 1883
-::WiFiServer tcp_server(1883);
-
-// websocket server on tcp port 80
-::WiFiServer websocket_underlying_server(80);
-PicoWebsocket::Server<::WiFiServer> websocket_server(websocket_underlying_server);
-
-// MQTT server using the two server instances
-PicoMQTT::Server mqtt(tcp_server, websocket_server);  // NOTE: this constructor can take any number of server parameters
+WiFiServer server(80);
+PicoWebsocket::Server<::WiFiServer> websocket_server(server);
+PicoMQTT::Server mqtt(websocket_server);
 
 void setup() {
     // Setup serial
@@ -39,6 +31,12 @@ void setup() {
     mqtt.begin();
 }
 
+unsigned long last_publish = 0;
+
 void loop() {
     mqtt.loop();
+    if (millis() - last_publish >= 2000) {
+        mqtt.publish("picomqtt/foo", "Hello");
+        last_publish = millis();
+    }
 }
