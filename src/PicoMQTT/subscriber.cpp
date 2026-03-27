@@ -103,8 +103,9 @@ SubscribedMessageListener::subscribe(const String &topic_filter,
                                      MessageCallback callback) {
   TRACE_FUNCTION
   unsubscribe(topic_filter);
-  auto pair = subscriptions.emplace(
-      std::make_pair(Subscription(topic_filter), callback));
+  auto pair = subscriptions.emplace(std::piecewise_construct,
+                                    std::forward_as_tuple(topic_filter.c_str()),
+                                    std::forward_as_tuple(std::move(callback)));
   return pair.first->first.id;
 }
 

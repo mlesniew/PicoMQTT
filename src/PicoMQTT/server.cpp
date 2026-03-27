@@ -1,4 +1,5 @@
 #include "server.h"
+
 #include "config.h"
 #include "debug.h"
 
@@ -83,7 +84,7 @@ namespace PicoMQTT {
 
 Server::Client::Client(Server &server, ::Client *client)
     : SocketOwner(client), Connection(*socket, 0, server.socket_timeout_millis),
-      server(server), client_id("<unknown>") {
+      server(server), client_id("<unknown>"), subscriptions(nullptr) {
   TRACE_FUNCTION
   wait_for_reply(Packet::CONNECT, [this](IncomingPacket &packet) {
     TRACE_FUNCTION
@@ -281,36 +282,52 @@ void Server::Client::on_unsubscribe(IncomingPacket &unsubscribe) {
   unsuback.send();
 }
 
+Server::Client::~Client() {
+  if (subscriptions) {
+    delete subscriptions;
+  }
+}
+
 const char *Server::Client::get_subscription_pattern(
     Server::Client::SubscriptionId id) const {
-  for (const auto &pattern : subscriptions)
-    if (pattern.id == id) {
-      return pattern.c_str();
-    }
+  TRACE_FUNCTION
+  for (const Subscription *s = subscriptions; s; s = s->next)
+    if (s->id == id)
+      return s->c_str();
   return nullptr;
 }
 
 Server::Client::SubscriptionId
 Server::Client::get_subscription(const char *topic) const {
   TRACE_FUNCTION
-  for (const auto &pattern : subscriptions)
-    if (topic_matches(pattern.c_str(), topic)) {
-      return pattern.id;
-    }
+  for (const Subscription *s = subscriptions; s; s = s->next)
+    if (topic_matches(s->c_str(), topic))
+      return s->id;
   return 0;
 }
 
 Server::Client::SubscriptionId
 Server::Client::subscribe(const String &topic_filter) {
   TRACE_FUNCTION
-  const Subscription subscription(topic_filter.c_str());
-  subscriptions.insert(subscription);
-  return subscription.id;
+  unsubscribe(topic_filter);
+  Subscription *node = new Subscription(topic_filter.c_str());
+  node->next = subscriptions;
+  subscriptions = node;
+  return node->id;
 }
 
 void Server::Client::unsubscribe(const String &topic_filter) {
   TRACE_FUNCTION
-  subscriptions.erase(topic_filter.c_str());
+  Subscription **curr = &subscriptions;
+  while (*curr) {
+    if (**curr == topic_filter) {
+      Subscription * delete_me = *curr;
+      *curr = delete_me->next;
+      delete delete_me;
+      return;
+    }
+    curr = &((*curr)->next);
+  }
 }
 
 void Server::Client::handle_packet(IncomingPacket &packet) {

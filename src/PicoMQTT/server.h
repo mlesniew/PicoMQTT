@@ -1,9 +1,8 @@
 #pragma once
 
-#include <list>
-#include <set>
-
 #include <Arduino.h>
+
+#include <list>
 
 #if defined(ESP32)
 #include <WiFi.h>
@@ -145,10 +144,12 @@ public:
     virtual SubscriptionId subscribe(const String &topic_filter) override;
     virtual void unsubscribe(const String &topic_filter) override;
 
+    ~Client();
+
   protected:
     Server &server;
     String client_id;
-    std::set<Subscription> subscriptions;
+    Subscription *subscriptions;
 
     virtual void on_subscribe(IncomingPacket &packet);
     virtual void on_unsubscribe(IncomingPacket &packet);

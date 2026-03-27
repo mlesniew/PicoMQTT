@@ -1,9 +1,9 @@
 #pragma once
 
+#include <Arduino.h>
+
 #include <functional>
 #include <map>
-
-#include <Arduino.h>
 
 #include "autoid.h"
 #include "config.h"
@@ -33,8 +33,18 @@ public:
 protected:
   class Subscription : public String, public AutoId {
   public:
-    using String::String;
+    Subscription(const char *topic) : String(topic), next(nullptr) {}
     Subscription(const String &str) : Subscription(str.c_str()) {}
+
+    Subscription(const Subscription &) = delete;
+    Subscription &operator=(const Subscription &) = delete;
+
+    virtual ~Subscription() {
+      if (next)
+        delete next;
+    }
+
+    Subscription *next;
   };
 };
 
