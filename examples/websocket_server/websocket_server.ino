@@ -33,6 +33,12 @@ void setup() {
     mqtt.begin();
 }
 
+unsigned long last_publish = 0;
+
 void loop() {
     mqtt.loop();
+    if (millis() - last_publish >= 2000) {
+        mqtt.publish("picomqtt/foo", "Hello");
+        last_publish = millis();
+    }
 }
