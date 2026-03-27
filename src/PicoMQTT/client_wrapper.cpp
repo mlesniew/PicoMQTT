@@ -11,6 +11,11 @@ ClientWrapper::ClientWrapper(::Client & client, unsigned long socket_timeout_mil
     TRACE_FUNCTION
 }
 
+void ClientWrapper::abort() {
+    TRACE_FUNCTION
+    stop();
+}
+
 // reads
 int ClientWrapper::available_wait(unsigned long timeout) {
     TRACE_FUNCTION
@@ -25,7 +30,7 @@ int ClientWrapper::available_wait(unsigned long timeout) {
             return 0;
         }
         const unsigned long elapsed = millis() - start_millis;
-        if (elapsed > timeout) {
+        if (elapsed >= timeout) {
             return 0;
         }
         yield();
@@ -41,7 +46,7 @@ int ClientWrapper::read(uint8_t * buf, size_t size) {
         const unsigned long now_millis = millis();
         const unsigned long elapsed_millis = now_millis - start_millis;
 
-        if (elapsed_millis > socket_timeout_millis) {
+        if (elapsed_millis >= socket_timeout_millis) {
             // timeout
             abort();
             break;
@@ -101,6 +106,12 @@ size_t ClientWrapper::write(const uint8_t * buffer, size_t size) {
         }
 
         ret += bytes_written;
+        yield();
+    }
+
+    if (ret != size) {
+        abort();
+        return 0;
     }
 
     return ret;
