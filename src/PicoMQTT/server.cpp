@@ -86,8 +86,7 @@ Server::Client::Client(Server & server, ::Client * client)
     : SocketOwner(client),
       Connection(*socket, 0, server.socket_timeout_millis),
       server(server),
-      client_id("<unknown>"),
-      subscriptions(nullptr) {
+      client_id("<unknown>") {
     TRACE_FUNCTION
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
         TRACE_FUNCTION
@@ -285,50 +284,13 @@ void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
     unsuback.send();
 }
 
-Server::Client::~Client() {
-    if (subscriptions) {
-        delete subscriptions;
-    }
-}
-
-const char * Server::Client::get_subscription_pattern(
-    Server::Client::SubscriptionId id) const {
-    TRACE_FUNCTION
-    for (const Subscription * s = subscriptions; s; s = s->next)
-        if (s->id == id) return s->c_str();
-    return nullptr;
-}
-
-Server::Client::SubscriptionId Server::Client::get_subscription(
-    const char * topic) const {
-    TRACE_FUNCTION
-    for (const Subscription * s = subscriptions; s; s = s->next)
-        if (topic_matches(s->c_str(), topic)) return s->id;
-    return 0;
-}
-
 Server::Client::SubscriptionId Server::Client::subscribe(
     const String & topic_filter) {
     TRACE_FUNCTION
     unsubscribe(topic_filter);
     Subscription * node = new Subscription(topic_filter.c_str());
-    node->next = subscriptions;
-    subscriptions = node;
-    return node->id;
-}
-
-void Server::Client::unsubscribe(const String & topic_filter) {
-    TRACE_FUNCTION
-    Subscription ** curr = &subscriptions;
-    while (*curr) {
-        if (**curr == topic_filter) {
-            Subscription * delete_me = *curr;
-            *curr = delete_me->next;
-            delete delete_me;
-            return;
-        }
-        curr = &((*curr)->next);
-    }
+    insert_subscription(node);
+    return node;
 }
 
 void Server::Client::handle_packet(IncomingPacket & packet) {

@@ -5,6 +5,66 @@
 
 namespace PicoMQTT {
 
+Subscriber::Subscriber() : subscriptions(nullptr) {}
+
+Subscriber::~Subscriber() {
+    Subscription * current = subscriptions;
+    while (current) {
+        Subscription * next = current->next;
+        delete current;
+        current = next;
+    }
+}
+
+void Subscriber::insert_subscription(Subscription * subscription) {
+    subscription->next = subscriptions;
+    subscriptions = subscription;
+}
+
+const char * Subscriber::get_subscription_pattern(SubscriptionId id) const {
+    return id ? id->topic.c_str() : nullptr;
+}
+
+Subscriber::SubscriptionId Subscriber::get_subscription(const char * topic) const {
+    for (const Subscription * s = subscriptions; s; s = s->next) {
+        if (topic_matches(s->topic.c_str(), topic)) {
+            return s;
+        }
+    }
+    return nullptr;
+}
+
+bool Subscriber::unsubscribe(const String & topic_filter) {
+    Subscription ** current = &subscriptions;
+    while (*current) {
+        if ((*current)->topic == topic_filter) {
+            Subscription * to_delete = *current;
+            *current = to_delete->next;
+            delete to_delete;
+            return true;
+        }
+        current = &(*current)->next;
+    }
+    return false;
+}
+
+bool Subscriber::unsubscribe(SubscriptionId id) {
+    if (!id) {
+        return false;
+    }
+    Subscription ** current = &subscriptions;
+    while (*current) {
+        if (*current == id) {
+            Subscription * to_delete = *current;
+            *current = to_delete->next;
+            delete to_delete;
+            return true;
+        }
+        current = &(*current)->next;
+    }
+    return false;
+}
+
 String Subscriber::get_topic_element(const char * topic, size_t index) {
     while (index && topic[0]) {
         if (topic++[0] == '/') {
@@ -67,28 +127,6 @@ bool Subscriber::topic_matches(const char * p, const char * t) {
     }
 }
 
-const char * SubscribedMessageListener::get_subscription_pattern(
-    SubscriptionId id) const {
-    TRACE_FUNCTION
-    for (const auto & kv : subscriptions) {
-        if (kv.first.id == id) {
-            return kv.first.c_str();
-        }
-    }
-    return nullptr;
-}
-
-Subscriber::SubscriptionId SubscribedMessageListener::get_subscription(
-    const char * topic) const {
-    TRACE_FUNCTION
-    for (const auto & kv : subscriptions) {
-        if (topic_matches(kv.first.c_str(), topic)) {
-            return kv.first.id;
-        }
-    }
-    return 0;
-}
-
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter) {
     TRACE_FUNCTION
@@ -102,23 +140,21 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, MessageCallback callback) {
     TRACE_FUNCTION
     unsubscribe(topic_filter);
-    auto pair = subscriptions.emplace(
-        std::piecewise_construct, std::forward_as_tuple(topic_filter.c_str()),
-        std::forward_as_tuple(std::move(callback)));
-    return pair.first->first.id;
-}
 
-void SubscribedMessageListener::unsubscribe(const String & topic_filter) {
-    TRACE_FUNCTION
-    subscriptions.erase(topic_filter);
+    SubscriptionWithCallback * node =
+        new SubscriptionWithCallback(topic_filter, std::move(callback));
+
+    insert_subscription(node);
+    return node;
 }
 
 void SubscribedMessageListener::fire_message_callbacks(
     const char * topic, IncomingPacket & packet) {
     TRACE_FUNCTION
-    for (const auto & kv : subscriptions) {
-        if (topic_matches(kv.first.c_str(), topic)) {
-            kv.second((char *)topic, packet);
+    for (Subscription * s = subscriptions; s; s = s->next) {
+        if (topic_matches(s->topic.c_str(), topic)) {
+            static_cast<SubscriptionWithCallback *>(s)->callback(
+                const_cast<char *>(topic), packet);
             return;
         }
     }
@@ -183,4 +219,4 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
         max_size);
 }
 
-};  // namespace PicoMQTT
+}  // namespace PicoMQTT

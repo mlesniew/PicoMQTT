@@ -3,9 +3,7 @@
 #include <Arduino.h>
 
 #include <functional>
-#include <map>
 
-#include "autoid.h"
 #include "config.h"
 
 namespace PicoMQTT {
@@ -13,38 +11,42 @@ namespace PicoMQTT {
 class IncomingPacket;
 
 class Subscriber {
+protected:
+    struct Subscription {
+        Subscription(const String & topic) : topic(topic), next(nullptr) {}
+        Subscription(const Subscription &) = delete;
+        Subscription & operator=(const Subscription &) = delete;
+
+        virtual ~Subscription() {}
+
+        const String topic;
+        Subscription * next;
+    };
+
+    void insert_subscription(Subscription * subscription);
+
+    Subscription * subscriptions;
+
 public:
-    typedef AutoId::Id SubscriptionId;
+    typedef const Subscription * SubscriptionId;
+
+    Subscriber();
+
+    virtual ~Subscriber();
 
     static bool topic_matches(const char * topic_filter, const char * topic);
     static String get_topic_element(const char * topic, size_t index);
     static String get_topic_element(const String & topic, size_t index);
 
-    virtual const char * get_subscription_pattern(SubscriptionId id) const = 0;
-    virtual SubscriptionId get_subscription(const char * topic) const = 0;
+    const char * get_subscription_pattern(SubscriptionId id) const;
+
+    SubscriptionId get_subscription(const char * topic) const;
 
     virtual SubscriptionId subscribe(const String & topic_filter) = 0;
 
-    virtual void unsubscribe(const String & topic_filter) = 0;
-    void unsubscribe(SubscriptionId id) {
-        unsubscribe(get_subscription_pattern(id));
-    }
+    virtual bool unsubscribe(const String & topic_filter);
 
-protected:
-    class Subscription : public String, public AutoId {
-    public:
-        Subscription(const char * topic) : String(topic), next(nullptr) {}
-        Subscription(const String & str) : Subscription(str.c_str()) {}
-
-        Subscription(const Subscription &) = delete;
-        Subscription & operator=(const Subscription &) = delete;
-
-        virtual ~Subscription() {
-            if (next) delete next;
-        }
-
-        Subscription * next;
-    };
+    virtual bool unsubscribe(SubscriptionId id);
 };
 
 class SubscribedMessageListener : public Subscriber {
@@ -54,10 +56,6 @@ public:
     // take const arguments.  Similarly with Strings.
     typedef std::function<void(char * topic, IncomingPacket & packet)>
         MessageCallback;
-
-    virtual const char * get_subscription_pattern(
-        SubscriptionId id) const override;
-    virtual SubscriptionId get_subscription(const char * topic) const override;
 
     virtual SubscriptionId subscribe(const String & topic_filter) override;
     virtual SubscriptionId subscribe(const String & topic_filter,
@@ -78,8 +76,6 @@ public:
                              std::function<void(char *)> callback,
                              size_t max_size = PICOMQTT_MAX_MESSAGE_SIZE);
 
-    virtual void unsubscribe(const String & topic_filter) override;
-
     virtual void on_extra_message(const char * topic, IncomingPacket & packet) {
     }
     virtual void on_message_too_big(const char * topic,
@@ -88,7 +84,13 @@ public:
 protected:
     void fire_message_callbacks(const char * topic, IncomingPacket & packet);
 
-    std::map<Subscription, MessageCallback> subscriptions;
+    class SubscriptionWithCallback : public Subscriber::Subscription {
+    public:
+        SubscriptionWithCallback(const String & topic, MessageCallback callback)
+            : Subscription(topic), callback(std::move(callback)) {}
+
+        const MessageCallback callback;
+    };
 };
 
 }  // namespace PicoMQTT

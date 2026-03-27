@@ -140,19 +140,11 @@ public:
 
         virtual void loop() override;
 
-        virtual const char * get_subscription_pattern(
-            SubscriptionId id) const override;
-        virtual SubscriptionId get_subscription(
-            const char * topic) const override;
         virtual SubscriptionId subscribe(const String & topic_filter) override;
-        virtual void unsubscribe(const String & topic_filter) override;
-
-        ~Client();
 
     protected:
         Server & server;
         String client_id;
-        Subscription * subscriptions;
 
         virtual void on_subscribe(IncomingPacket & packet);
         virtual void on_unsubscribe(IncomingPacket & packet);

@@ -1,4 +1,4 @@
 .pio
 *.orig
 *.tar.gz
-/config.h
+examples/*/src/config.h

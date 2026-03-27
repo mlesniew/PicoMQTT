@@ -229,10 +229,24 @@ Client::Client(ClientSocketInterface * socket, const char * host, uint16_t port,
     return ret;
 }
 
-void Client::unsubscribe(const String & topic_filter) {
+bool Client::unsubscribe(const String & topic_filter) {
     TRACE_FUNCTION
-    BasicClient::unsubscribe(topic_filter);
-    SubscribedMessageListener::unsubscribe(topic_filter);
+    if (SubscribedMessageListener::unsubscribe(topic_filter)) {
+        BasicClient::unsubscribe(topic_filter);
+        return true;
+    }
+    return false;
+}
+
+bool Client::unsubscribe(const SubscriptionId id) {
+    TRACE_FUNCTION
+    if (!id) return false;
+    String topic = id->topic;
+    if (SubscribedMessageListener::unsubscribe(id)) {
+        BasicClient::unsubscribe(topic);
+        return true;
+    }
+    return false;
 }
 
 void Client::on_message(const char * topic, IncomingPacket & packet) {
@@ -268,8 +282,8 @@ void Client::loop() {
             return;
         }
 
-        for (const auto & kv : subscriptions) {
-            BasicClient::subscribe(kv.first.c_str());
+        for (Subscription * s = subscriptions; s; s = s->next) {
+            BasicClient::subscribe(s->topic.c_str());
         }
 
         on_connect();

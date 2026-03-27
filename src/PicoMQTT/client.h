@@ -92,7 +92,8 @@ public:
     using SubscribedMessageListener::subscribe;
     virtual SubscriptionId subscribe(const String & topic_filter,
                                      MessageCallback callback) override;
-    virtual void unsubscribe(const String & topic_filter) override;
+    virtual bool unsubscribe(const String & topic_filter) override;
+    virtual bool unsubscribe(const SubscriptionId id) override;
 
     virtual void loop() override;
 
