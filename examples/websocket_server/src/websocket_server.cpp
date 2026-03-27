@@ -18,27 +18,28 @@ PicoWebsocket::Server<::WiFiServer> websocket_server(server);
 PicoMQTT::Server mqtt(websocket_server);
 
 void setup() {
-  // Setup serial
-  Serial.begin(115200);
+    // Setup serial
+    Serial.begin(115200);
 
-  // Connect to WiFi
-  Serial.printf("Connecting to WiFi %s\n", WIFI_SSID);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-  }
-  Serial.printf("WiFi connected, IP: %s\n", WiFi.localIP().toString().c_str());
+    // Connect to WiFi
+    Serial.printf("Connecting to WiFi %s\n", WIFI_SSID);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+    }
+    Serial.printf("WiFi connected, IP: %s\n",
+                  WiFi.localIP().toString().c_str());
 
-  mqtt.begin();
+    mqtt.begin();
 }
 
 unsigned long last_publish = 0;
 
 void loop() {
-  mqtt.loop();
-  if (millis() - last_publish >= 2000) {
-    mqtt.publish("picomqtt/foo", "Hello");
-    last_publish = millis();
-  }
+    mqtt.loop();
+    if (millis() - last_publish >= 2000) {
+        mqtt.publish("picomqtt/foo", "Hello");
+        last_publish = millis();
+    }
 }

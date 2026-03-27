@@ -1,27 +1,27 @@
 #pragma once
 
-#include <vector>
-
 #include <Arduino.h>
+
+#include <vector>
 
 namespace PicoMQTT {
 
 class PrintMux : public ::Print {
 public:
-  PrintMux() {}
+    PrintMux() {}
 
-  PrintMux(Print &print) : prints({&print}) {}
+    PrintMux(Print & print) : prints({&print}) {}
 
-  void add(Print &print) { prints.push_back(&print); }
+    void add(Print & print) { prints.push_back(&print); }
 
-  virtual size_t write(uint8_t) override;
-  virtual size_t write(const uint8_t *buffer, size_t size) override;
-  virtual void flush();
+    virtual size_t write(uint8_t) override;
+    virtual size_t write(const uint8_t * buffer, size_t size) override;
+    virtual void flush();
 
-  size_t size() const { return prints.size(); }
+    size_t size() const { return prints.size(); }
 
 protected:
-  std::vector<Print *> prints;
+    std::vector<Print *> prints;
 };
 
-} // namespace PicoMQTT
+}  // namespace PicoMQTT
