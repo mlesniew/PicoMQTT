@@ -8,17 +8,17 @@ namespace PicoMQTT {
 ClientWrapper::ClientWrapper(::Client & client,
                              unsigned long socket_timeout_millis)
     : socket_timeout_millis(socket_timeout_millis), client(client) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 }
 
 void ClientWrapper::abort() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     stop();
 }
 
 // reads
 int ClientWrapper::available_wait(unsigned long timeout) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const unsigned long start_millis = millis();
     while (true) {
         const int ret = available();
@@ -39,7 +39,7 @@ int ClientWrapper::available_wait(unsigned long timeout) {
 }
 
 int ClientWrapper::read(uint8_t * buf, size_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const unsigned long start_millis = millis();
     size_t ret = 0;
 
@@ -81,7 +81,7 @@ int ClientWrapper::read(uint8_t * buf, size_t size) {
 }
 
 int ClientWrapper::read() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (!available_wait(socket_timeout_millis)) {
         return -1;
     }
@@ -89,7 +89,7 @@ int ClientWrapper::read() {
 }
 
 int ClientWrapper::peek() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (!available_wait(socket_timeout_millis)) {
         return -1;
     }
@@ -98,7 +98,7 @@ int ClientWrapper::peek() {
 
 // writes
 size_t ClientWrapper::write(const uint8_t * buffer, size_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     size_t ret = 0;
 
     while (connected() && ret < size) {
@@ -122,52 +122,52 @@ size_t ClientWrapper::write(const uint8_t * buffer, size_t size) {
 }
 
 size_t ClientWrapper::write(uint8_t value) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return write(&value, 1);
 }
 
 // simple wrappers forwarding requests to this->client
 int ClientWrapper::connect(IPAddress ip, uint16_t port) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.connect(ip, port);
 }
 
 int ClientWrapper::connect(const char * host, uint16_t port) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.connect(host, port);
 }
 
 #ifdef PICOMQTT_EXTRA_CONNECT_METHODS
 
 int ClientWrapper::connect(IPAddress ip, uint16_t port, int32_t timeout) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.connect(ip, port, timeout);
 }
 
 int ClientWrapper::connect(const char * host, uint16_t port, int32_t timeout) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.connect(host, port, timeout);
 }
 
 #endif
 
 int ClientWrapper::available() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.available();
 }
 
 void ClientWrapper::flush() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     client.flush();
 }
 
 void ClientWrapper::stop() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     client.stop();
 }
 
 uint8_t ClientWrapper::connected() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.connected();
 }
 

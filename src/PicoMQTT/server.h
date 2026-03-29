@@ -39,7 +39,7 @@ public:
     using Server::Server;
 
     virtual ::Client * accept_client() override {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         auto client = Server::accept();
         if (!client) {
             // no connection
@@ -50,7 +50,7 @@ public:
     };
 
     virtual void begin() override {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         Server::begin();
     }
 };
@@ -63,7 +63,7 @@ public:
     ServerSocketProxy(Server & server) : server(server) {}
 
     virtual ::Client * accept_client() override {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         auto client = server.accept();
         if (!client) {
             // no connection
@@ -74,7 +74,7 @@ public:
     };
 
     virtual void begin() override {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         server.begin();
     }
 };
@@ -87,7 +87,7 @@ public:
     }
 
     virtual ::Client * accept_client() override {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         for (auto & server : servers) {
             auto client = server->accept_client();
             if (client) {
@@ -99,7 +99,7 @@ public:
     };
 
     virtual void begin() override {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         for (auto & server : servers) {
             server->begin();
         }
@@ -172,19 +172,19 @@ public:
 
     Server(uint16_t port = 1883)
         : Server(new ServerSocket<::WiFiServer>(port)) {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
     }
 
     template <typename ServerType>
     Server(ServerType & server)
         : Server(new ServerSocketProxy<ServerType>(server)) {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
     }
 
     template <typename ServerType, typename... Targs>
     Server(ServerType & server, Targs &... Fargs)
         : Server(new ServerSocketMux(server, Fargs...)) {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
     }
 
     void begin() override;
@@ -214,7 +214,7 @@ protected:
 
     Server(ServerSocketInterface * socket)
         : Server(std::unique_ptr<ServerSocketInterface>(socket)) {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
     }
 
     virtual void on_message(const char * topic, IncomingPacket & packet);

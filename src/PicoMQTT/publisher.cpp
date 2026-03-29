@@ -11,7 +11,7 @@ Publisher::Publish::Publish(Publisher & publisher, Print & print, uint8_t flags,
       qos((flags >> 1) & 0b11),
       message_id(message_id),
       publisher(publisher) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     OutgoingPacket::write_header();
     write_string(topic, topic_size);

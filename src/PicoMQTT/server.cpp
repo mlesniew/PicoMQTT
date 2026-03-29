@@ -7,40 +7,53 @@ namespace {
 
 class BufferClient : public ::Client {
 public:
-    BufferClient(const void * ptr) : ptr((const char *)ptr) { TRACE_FUNCTION }
+    BufferClient(const void * ptr) : ptr((const char *)ptr) { TRACE_FUNCTION; }
 
     // these methods are nop dummies
     virtual int connect(IPAddress ip, uint16_t port) override final {
-        TRACE_FUNCTION return 0;
+        TRACE_FUNCTION;
+        return 0;
     }
     virtual int connect(const char * host, uint16_t port) override final {
-        TRACE_FUNCTION return 0;
+        TRACE_FUNCTION;
+        return 0;
     }
 #ifdef PICOMQTT_EXTRA_CONNECT_METHODS
     virtual int connect(IPAddress ip, uint16_t port,
                         int32_t timeout) override final {
-        TRACE_FUNCTION return 0;
+        TRACE_FUNCTION;
+        return 0;
     }
     virtual int connect(const char * host, uint16_t port,
                         int32_t timeout) override final {
-        TRACE_FUNCTION return 0;
+        TRACE_FUNCTION;
+        return 0;
     }
 #endif
     virtual size_t write(const uint8_t * buffer, size_t size) override final {
-        TRACE_FUNCTION return 0;
+        TRACE_FUNCTION;
+        return 0;
     }
     virtual size_t write(uint8_t value) override final {
-        TRACE_FUNCTION return 0;
+        TRACE_FUNCTION;
+        return 0;
     }
-    virtual void flush() override final { TRACE_FUNCTION }
-    virtual void stop() override final { TRACE_FUNCTION }
+    virtual void flush() override final { TRACE_FUNCTION; }
+    virtual void stop() override final { TRACE_FUNCTION; }
 
     // these methods are in jasager mode
     virtual int available() override final {
-        TRACE_FUNCTION return std::numeric_limits<int>::max();
+        TRACE_FUNCTION;
+        return std::numeric_limits<int>::max();
     }
-    virtual operator bool() override final { TRACE_FUNCTION return true; }
-    virtual uint8_t connected() override final { TRACE_FUNCTION return true; }
+    virtual operator bool() override final {
+        TRACE_FUNCTION;
+        return true;
+    }
+    virtual uint8_t connected() override final {
+        TRACE_FUNCTION;
+        return true;
+    }
 
     // actual reads implemented here
     virtual int read(uint8_t * buf, size_t size) override {
@@ -50,14 +63,14 @@ public:
     }
 
     virtual int read() override final {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         uint8_t ret;
         read(&ret, 1);
         return ret;
     }
 
     virtual int peek() override final {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
         const int ret = read();
         --ptr;
         return ret;
@@ -85,7 +98,7 @@ namespace PicoMQTT {
 Server::PrintMux::PrintMux(Server & server) : server(server) {}
 
 size_t Server::PrintMux::write(uint8_t c) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     for (Client * client = server.clients; client; client = client->next) {
         if (client->subscribed) {
             client->get_print().write(c);
@@ -95,7 +108,7 @@ size_t Server::PrintMux::write(uint8_t c) {
 }
 
 size_t Server::PrintMux::write(const uint8_t * buf, size_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     for (Client * client = server.clients; client; client = client->next) {
         if (client->subscribed) {
             client->get_print().write(buf, size);
@@ -105,7 +118,7 @@ size_t Server::PrintMux::write(const uint8_t * buf, size_t size) {
 }
 
 void Server::PrintMux::flush() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     for (Client * client = server.clients; client; client = client->next) {
         if (client->subscribed) {
             client->get_print().flush();
@@ -120,12 +133,12 @@ Server::Client::Client(Server & server, ::Client * client)
       subscribed(false),
       server(server),
       client_id("<unknown>") {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
-        TRACE_FUNCTION
+        TRACE_FUNCTION;
 
         auto connack = [this](ConnectReturnCode crc) {
-            TRACE_FUNCTION
+            TRACE_FUNCTION;
             auto connack = build_packet(Packet::CONNACK, 0, 2);
             connack.write_u8(0); /* session present always set to zero */
             connack.write_u8(crc);
@@ -232,7 +245,7 @@ Server::Client::Client(Server & server, ::Client * client)
 }
 
 void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     const size_t payload_size = packet.get_remaining_size();
     auto publish = server.begin_publish(topic, payload_size);
@@ -247,7 +260,7 @@ void Server::Client::on_message(const char * topic, IncomingPacket & packet) {
 }
 
 void Server::Client::on_subscribe(IncomingPacket & subscribe) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const uint16_t message_id = subscribe.read_u16();
 
     if ((subscribe.get_flags() != 0b0010) || !message_id) {
@@ -307,7 +320,7 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
 }
 
 void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const uint16_t message_id = unsubscribe.read_u16();
 
     if ((unsubscribe.get_flags() != 0b0010) || !message_id) {
@@ -337,7 +350,7 @@ void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
 
 Server::Client::SubscriptionId Server::Client::subscribe(
     const String & topic_filter) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     unsubscribe(topic_filter);
     Subscription * node = new Subscription(topic_filter.c_str());
     insert_subscription(node);
@@ -345,7 +358,7 @@ Server::Client::SubscriptionId Server::Client::subscribe(
 }
 
 void Server::Client::handle_packet(IncomingPacket & packet) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     switch (packet.get_type()) {
         case Packet::PINGREQ:
@@ -367,7 +380,7 @@ void Server::Client::handle_packet(IncomingPacket & packet) {
 }
 
 void Server::Client::loop() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (keep_alive_millis &&
         (get_millis_since_last_read() > keep_alive_millis)) {
         // ping timeout
@@ -380,16 +393,17 @@ void Server::Client::loop() {
 
 Server::IncomingPublish::IncomingPublish(IncomingPacket & packet,
                                          Publish & publish)
-    : IncomingPacket(std::move(packet)),
-      publish(publish){TRACE_FUNCTION}
+    : IncomingPacket(std::move(packet)), publish(publish) {
+    TRACE_FUNCTION;
+}
 
-      Server::IncomingPublish::~IncomingPublish() {
-    TRACE_FUNCTION
+Server::IncomingPublish::~IncomingPublish() {
+    TRACE_FUNCTION;
     pos += publish.write_from_client(client, get_remaining_size());
 }
 
 int Server::IncomingPublish::read(uint8_t * buf, size_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const int ret = IncomingPacket::read(buf, size);
     if (ret > 0) {
         publish.write(buf, ret);
@@ -398,7 +412,7 @@ int Server::IncomingPublish::read(uint8_t * buf, size_t size) {
 }
 
 int Server::IncomingPublish::read() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const int ret = IncomingPacket::read();
     if (ret >= 0) {
         publish.write(ret);
@@ -425,12 +439,12 @@ Server::~Server() {
 }
 
 void Server::begin() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     server->begin();
 }
 
 void Server::loop() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     ::Client * client_ptr = server->accept_client();
     if (client_ptr) {
@@ -456,7 +470,7 @@ void Server::loop() {
 }
 
 bool Server::set_subscribed(const char * topic) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     bool any_subscribed = false;
     for (Client * client = clients; client; client = client->next) {
         client->subscribed = (client->get_subscription(topic) != nullptr);
@@ -468,20 +482,20 @@ bool Server::set_subscribed(const char * topic) {
 Publisher::Publish Server::begin_publish(const char * topic,
                                          const size_t payload_size, uint8_t,
                                          bool, uint16_t) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     set_subscribed(topic);
     return Publish(*this, print_mux, topic, payload_size);
 }
 
 void Server::on_message(const char * topic, IncomingPacket & packet) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     fire_message_callbacks(topic, packet);
 }
 
 bool ServerLocalSubscribe::publish(const char * topic, const void * payload,
                                    const size_t payload_size, uint8_t qos,
                                    bool retain, uint16_t message_id) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const bool ret =
         Server::publish(topic, payload, payload_size, qos, retain, message_id);
     BufferClient buffer(payload);
@@ -493,7 +507,7 @@ bool ServerLocalSubscribe::publish(const char * topic, const void * payload,
 bool ServerLocalSubscribe::publish_P(const char * topic, PGM_P payload,
                                      const size_t payload_size, uint8_t qos,
                                      bool retain, uint16_t message_id) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const bool ret = Server::publish_P(topic, payload, payload_size, qos,
                                        retain, message_id);
     BufferClientP buffer((void *)payload);

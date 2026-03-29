@@ -10,11 +10,13 @@ Connection::Connection(::Client & client, unsigned long keep_alive_millis,
     : client(client, socket_timeout_millis),
       keep_alive_millis(keep_alive_millis),
       last_read(millis()),
-      last_write(millis()){TRACE_FUNCTION}
+      last_write(millis()) {
+    TRACE_FUNCTION;
+}
 
-      OutgoingPacket Connection::build_packet(Packet::Type type, uint8_t flags,
-                                              size_t length) {
-    TRACE_FUNCTION
+OutgoingPacket Connection::build_packet(Packet::Type type, uint8_t flags,
+                                        size_t length) {
+    TRACE_FUNCTION;
     last_write = millis();
     auto ret = OutgoingPacket(client, type, flags, length);
     ret.write_header();
@@ -22,35 +24,35 @@ Connection::Connection(::Client & client, unsigned long keep_alive_millis,
 }
 
 void Connection::on_timeout() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     client.abort();
     on_disconnect();
 }
 
 void Connection::on_protocol_violation() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     on_disconnect();
 }
 
 void Connection::on_disconnect() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     client.stop();
 }
 
 void Connection::disconnect() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     build_packet(Packet::DISCONNECT).send();
     client.stop();
 }
 
 bool Connection::connected() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return client.connected();
 }
 
 void Connection::wait_for_reply(
     Packet::Type type, std::function<void(IncomingPacket & packet)> handler) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     const unsigned long start = millis();
 
@@ -77,14 +79,14 @@ void Connection::wait_for_reply(
 }
 
 void Connection::send_ack(Packet::Type ack_type, uint16_t msg_id) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     auto ack = build_packet(ack_type, 0, 2);
     ack.write_u16(msg_id);
     ack.send();
 }
 
 void Connection::handle_packet(IncomingPacket & packet) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     switch (packet.get_type()) {
         case Packet::PUBLISH: {
@@ -144,17 +146,17 @@ void Connection::handle_packet(IncomingPacket & packet) {
 }
 
 unsigned long Connection::get_millis_since_last_read() const {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return millis() - last_read;
 }
 
 unsigned long Connection::get_millis_since_last_write() const {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return millis() - last_write;
 }
 
 void Connection::loop() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     // only handle 10 packets max in one go to not starve other connections
     for (unsigned int i = 0; (i < 10) && client.available(); ++i) {

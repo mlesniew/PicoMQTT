@@ -16,7 +16,7 @@ public:
 BasicClient::BasicClient(::Client & client, unsigned long keep_alive_millis,
                          unsigned long socket_timeout_millis)
     : Connection(client, keep_alive_millis, socket_timeout_millis) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 }
 
 bool BasicClient::connect(const char * host, uint16_t port, const char * id,
@@ -25,7 +25,7 @@ bool BasicClient::connect(const char * host, uint16_t port, const char * id,
                           const size_t will_message_length, uint8_t will_qos,
                           bool will_retain, const bool clean_session,
                           ConnectReturnCode * connect_return_code) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     if (connect_return_code) {
         *connect_return_code = CRC_UNDEFINED;
@@ -86,7 +86,7 @@ bool BasicClient::connect(const char * host, uint16_t port, const char * id,
 
     wait_for_reply(Packet::CONNACK,
                    [this, connect_return_code](IncomingPacket & packet) {
-                       TRACE_FUNCTION
+                       TRACE_FUNCTION;
                        if (packet.size != 2) {
                            on_protocol_violation();
                            return;
@@ -109,7 +109,7 @@ bool BasicClient::connect(const char * host, uint16_t port, const char * id,
 }
 
 void BasicClient::loop() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     if (client.connected() &&
         get_millis_since_last_write() >= keep_alive_millis) {
@@ -125,7 +125,7 @@ Publisher::Publish BasicClient::begin_publish(const char * topic,
                                               const size_t payload_size,
                                               uint8_t qos, bool retain,
                                               uint16_t message_id) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     Print & print = client.connected() ? (Print &)client : (Print &)dummy_print;
 
@@ -139,7 +139,7 @@ Publisher::Publish BasicClient::begin_publish(const char * topic,
 }
 
 bool BasicClient::on_publish_complete(const Publish & publish) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (publish.qos == 0) {
         return true;
     }
@@ -155,7 +155,7 @@ bool BasicClient::on_publish_complete(const Publish & publish) {
 
 bool BasicClient::subscribe(const String & topic, uint8_t qos,
                             uint8_t * qos_granted) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (qos > 1) {
         return false;
     }
@@ -193,7 +193,7 @@ bool BasicClient::subscribe(const String & topic, uint8_t qos,
 }
 
 bool BasicClient::unsubscribe(const String & topic) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     const size_t topic_size = topic.length();
     const uint16_t message_id = message_id_generator.generate();
@@ -228,12 +228,13 @@ Client::Client(ClientSocketInterface * socket, const char * host, uint16_t port,
       password(password),
       will({"", "", 0, false}),
       reconnect_interval_millis(reconnect_interval_millis),
-      last_reconnect_attempt(millis() -
-                             reconnect_interval_millis){TRACE_FUNCTION}
+      last_reconnect_attempt(millis() - reconnect_interval_millis) {
+    TRACE_FUNCTION;
+}
 
-      Client::SubscriptionId Client::subscribe(const String & topic_filter,
-                                               MessageCallback callback) {
-    TRACE_FUNCTION
+Client::SubscriptionId Client::subscribe(const String & topic_filter,
+                                         MessageCallback callback) {
+    TRACE_FUNCTION;
     const auto ret =
         SubscribedMessageListener::subscribe(topic_filter, callback);
     BasicClient::subscribe(topic_filter);
@@ -241,7 +242,7 @@ Client::Client(ClientSocketInterface * socket, const char * host, uint16_t port,
 }
 
 bool Client::unsubscribe(const String & topic_filter) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (SubscribedMessageListener::unsubscribe(topic_filter)) {
         BasicClient::unsubscribe(topic_filter);
         return true;
@@ -250,7 +251,7 @@ bool Client::unsubscribe(const String & topic_filter) {
 }
 
 bool Client::unsubscribe(const SubscriptionId id) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (!id) return false;
     String topic = id->topic;
     if (SubscribedMessageListener::unsubscribe(id)) {
@@ -265,7 +266,7 @@ void Client::on_message(const char * topic, IncomingPacket & packet) {
 }
 
 void Client::loop() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (!client.connected()) {
         if (host.isEmpty() || !port) {
             return;
@@ -304,7 +305,7 @@ void Client::loop() {
 }
 
 void Client::on_connect() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     BasicClient::on_connect();
     if (connected_callback) {
         connected_callback();
@@ -312,7 +313,7 @@ void Client::on_connect() {
 }
 
 void Client::on_disconnect() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     BasicClient::on_disconnect();
     if (disconnected_callback) {
         disconnected_callback();

@@ -42,7 +42,7 @@ protected:
 }  // namespace PicoMQTT
 
 #define TRACE_FUNCTION \
-    PicoMQTT::FunctionTracer _function_tracer(__PRETTY_FUNCTION__);
+    PicoMQTT::FunctionTracer _function_tracer(__PRETTY_FUNCTION__)
 
 #else
 

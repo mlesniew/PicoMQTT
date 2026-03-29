@@ -5,22 +5,24 @@
 namespace PicoMQTT {
 
 IncomingPacket::IncomingPacket(Client & client)
-    : Packet(read_header(client)),
-      client(client){TRACE_FUNCTION}
+    : Packet(read_header(client)), client(client) {
+    TRACE_FUNCTION;
+}
 
-      IncomingPacket::IncomingPacket(IncomingPacket && other)
+IncomingPacket::IncomingPacket(IncomingPacket && other)
     : Packet(other), client(other.client) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     other.pos = size;
 }
 
 IncomingPacket::IncomingPacket(const Type type, const uint8_t flags,
                                const size_t size, Client & client)
-    : Packet(type, flags, size),
-      client(client){TRACE_FUNCTION}
+    : Packet(type, flags, size), client(client) {
+    TRACE_FUNCTION;
+}
 
-      IncomingPacket::~IncomingPacket() {
-    TRACE_FUNCTION
+IncomingPacket::~IncomingPacket() {
+    TRACE_FUNCTION;
 #ifdef PICOMQTT_DEBUG
     if (pos != size) {
         Serial.print(F("IncomingPacket read incorrect number of bytes: "));
@@ -57,18 +59,18 @@ int IncomingPacket::connect(const char * host, uint16_t port, int32_t timeout) {
 #endif
 
 size_t IncomingPacket::write(const uint8_t * buffer, size_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return 0;
 }
 
 size_t IncomingPacket::write(uint8_t value) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return 0;
 }
 
-void IncomingPacket::flush() { TRACE_FUNCTION }
+void IncomingPacket::flush() { TRACE_FUNCTION; }
 
-void IncomingPacket::stop() { TRACE_FUNCTION }
+void IncomingPacket::stop() { TRACE_FUNCTION; }
 
 // extended functions
 int IncomingPacket::available() {
@@ -77,7 +79,7 @@ int IncomingPacket::available() {
 }
 
 int IncomingPacket::peek() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (!get_remaining_size()) {
 #if PICOMQTT_DEBUG
         Serial.println(F("Attempt to peek beyond end of IncomingPacket."));
@@ -88,7 +90,7 @@ int IncomingPacket::peek() {
 }
 
 int IncomingPacket::read() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     if (!get_remaining_size()) {
 #if PICOMQTT_DEBUG
         Serial.println(F("Attempt to read beyond end of IncomingPacket."));
@@ -103,7 +105,7 @@ int IncomingPacket::read() {
 }
 
 int IncomingPacket::read(uint8_t * buf, size_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const size_t remaining = get_remaining_size();
     const size_t read_size = remaining < size ? remaining : size;
 #if PICOMQTT_DEBUG
@@ -119,12 +121,12 @@ int IncomingPacket::read(uint8_t * buf, size_t size) {
 }
 
 IncomingPacket::operator bool() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return is_valid() && bool(client);
 }
 
 uint8_t IncomingPacket::connected() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return is_valid() && client.connected();
 }
 
@@ -154,7 +156,7 @@ void IncomingPacket::ignore(size_t len) {
 }
 
 Packet IncomingPacket::read_header(Client & client) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const int head = client.read();
     if (head <= 0) {
         return Packet();

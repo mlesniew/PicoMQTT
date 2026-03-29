@@ -14,16 +14,18 @@ OutgoingPacket::OutgoingPacket(Print & print, Packet::Type type, uint8_t flags,
 #ifndef PICOMQTT_UNBUFFERED
       buffer_position(0),
 #endif
-      state(State::ok){TRACE_FUNCTION}
+      state(State::ok) {
+    TRACE_FUNCTION;
+}
 
-      OutgoingPacket::OutgoingPacket(OutgoingPacket && other)
+OutgoingPacket::OutgoingPacket(OutgoingPacket && other)
     : OutgoingPacket(other) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     other.state = State::dead;
 }
 
 OutgoingPacket::~OutgoingPacket() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 #ifdef PICOMQTT_DEBUG
 #ifndef PICOMQTT_UNBUFFERED
     if (buffer_position) {
@@ -51,7 +53,7 @@ OutgoingPacket::~OutgoingPacket() {
 }
 
 size_t OutgoingPacket::write_from_client(::Client & client, size_t length) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     size_t written = 0;
 #ifndef PICOMQTT_UNBUFFERED
     while (written < length) {
@@ -96,7 +98,7 @@ size_t OutgoingPacket::write_from_client(::Client & client, size_t length) {
 }
 
 size_t OutgoingPacket::write_zero(size_t length) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     for (size_t written = 0; written < length; ++written) {
         write_u8('0');
     }
@@ -107,7 +109,7 @@ size_t OutgoingPacket::write_zero(size_t length) {
 size_t OutgoingPacket::write(const void * data, size_t remaining,
                              void * (*memcpy_fn)(void *, const void *,
                                                  size_t n)) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 
     const char * src = (const char *)data;
 
@@ -136,7 +138,7 @@ size_t OutgoingPacket::write(const void * data, size_t remaining,
 #endif
 
 size_t OutgoingPacket::write(const uint8_t * data, size_t length) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 #ifndef PICOMQTT_UNBUFFERED
     return write(data, length, memcpy);
 #else
@@ -147,7 +149,7 @@ size_t OutgoingPacket::write(const uint8_t * data, size_t length) {
 }
 
 size_t OutgoingPacket::write_P(PGM_P data, size_t length) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 #ifndef PICOMQTT_UNBUFFERED
     return write(data, length, memcpy_P);
 #else
@@ -172,22 +174,22 @@ size_t OutgoingPacket::write_P(PGM_P data, size_t length) {
 }
 
 size_t OutgoingPacket::write_u8(uint8_t c) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return write(&c, 1);
 }
 
 size_t OutgoingPacket::write_u16(uint16_t value) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return write_u8(value >> 8) + write_u8(value & 0xff);
 }
 
 size_t OutgoingPacket::write_string(const char * string, uint16_t size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return write_u16(size) + write((const uint8_t *)string, size);
 }
 
 size_t OutgoingPacket::write_packet_length(size_t length) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     size_t ret = 0;
     do {
         const uint8_t digit = length & 127;  // digit := length % 128
@@ -198,7 +200,7 @@ size_t OutgoingPacket::write_packet_length(size_t length) {
 }
 
 size_t OutgoingPacket::write_header() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const size_t ret = write_u8(head) + write_packet_length(size);
     // we've just written the header, payload starts now
     pos = 0;
@@ -206,7 +208,7 @@ size_t OutgoingPacket::write_header() {
 }
 
 void OutgoingPacket::flush() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
 #ifndef PICOMQTT_UNBUFFERED
     print.write(buffer, buffer_position);
     buffer_position = 0;
@@ -214,7 +216,7 @@ void OutgoingPacket::flush() {
 }
 
 bool OutgoingPacket::send() {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     const size_t remaining_size = get_remaining_size();
     if (remaining_size) {
 #ifdef PICOMQTT_DEBUG

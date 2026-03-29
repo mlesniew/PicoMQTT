@@ -88,12 +88,12 @@ String Subscriber::get_topic_element(const char * topic, size_t index) {
 }
 
 String Subscriber::get_topic_element(const String & topic, size_t index) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return get_topic_element(topic.c_str(), index);
 }
 
 bool Subscriber::topic_matches(const char * p, const char * t) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     // TODO: Special handling of the $ prefix
     while (true) {
         switch (*p) {
@@ -130,7 +130,7 @@ bool Subscriber::topic_matches(const char * p, const char * t) {
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return subscribe(topic_filter,
                      [this](const char * topic, IncomingPacket & packet) {
                          on_extra_message(topic, packet);
@@ -139,7 +139,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, MessageCallback callback) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     unsubscribe(topic_filter);
 
     SubscriptionWithCallback * node =
@@ -151,7 +151,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
 
 void SubscribedMessageListener::fire_message_callbacks(
     const char * topic, IncomingPacket & packet) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     for (Subscription * s = subscriptions; s; s = s->next) {
         if (topic_matches(s->topic.c_str(), topic)) {
             static_cast<SubscriptionWithCallback *>(s)->callback(
@@ -165,7 +165,7 @@ void SubscribedMessageListener::fire_message_callbacks(
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter,
     std::function<void(char *, void *, size_t)> callback, size_t max_size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return subscribe(topic_filter, [this, callback, max_size](
                                        char * topic, IncomingPacket & packet) {
         const size_t payload_size = packet.get_remaining_size();
@@ -187,7 +187,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, std::function<void(char *, char *)> callback,
     size_t max_size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return subscribe(
         topic_filter,
         [callback](char * topic, void * payload, size_t payload_size) {
@@ -199,7 +199,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, std::function<void(char *)> callback,
     size_t max_size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return subscribe(
         topic_filter,
         [callback](char * topic, void * payload, size_t payload_size) {
@@ -211,7 +211,7 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, std::function<void(void *, size_t)> callback,
     size_t max_size) {
-    TRACE_FUNCTION
+    TRACE_FUNCTION;
     return subscribe(
         topic_filter,
         [callback](char * topic, void * payload, size_t payload_size) {
