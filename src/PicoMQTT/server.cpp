@@ -1,5 +1,7 @@
 #include "server.h"
 
+#include <list>
+
 #include "config.h"
 #include "debug.h"
 
@@ -86,7 +88,8 @@ Server::Client::Client(Server & server, ::Client * client)
     : SocketOwner(client),
       Connection(*socket, 0, server.socket_timeout_millis),
       server(server),
-      client_id("<unknown>") {
+      client_id("<unknown>"),
+      next(nullptr) {
     TRACE_FUNCTION
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
         TRACE_FUNCTION
@@ -358,8 +361,16 @@ int Server::IncomingPublish::read() {
 Server::Server(std::unique_ptr<ServerSocketInterface> server)
     : keep_alive_tolerance_millis(10 * 1000),
       socket_timeout_millis(5 * 1000),
-      server(std::move(server)) {
-    TRACE_FUNCTION
+      server(std::move(server)),
+      clients(nullptr){TRACE_FUNCTION}
+
+      Server::~Server() {
+    Client * current = clients;
+    while (current) {
+        Client * next = current->next;
+        delete current;
+        current = next;
+    }
 }
 
 void Server::begin() {
@@ -372,20 +383,23 @@ void Server::loop() {
 
     ::Client * client_ptr = server->accept_client();
     if (client_ptr) {
-        clients.push_back(
-            std::unique_ptr<Client>(new Client(*this, client_ptr)));
-        on_connected(clients.back()->get_client_id());
+        Client * client = new Client(*this, client_ptr);
+        client->next = clients;
+        clients = client;
+        on_connected(client->get_client_id());
     }
 
-    for (auto it = clients.begin(); it != clients.end();) {
-        Client & client = **it;
-        client.loop();
+    Client ** current = &clients;
+    while (*current) {
+        Client * client = *current;
+        client->loop();
 
-        if (!client.connected()) {
-            on_disconnected(client.get_client_id());
-            clients.erase(it++);
+        if (!client->connected()) {
+            on_disconnected(client->get_client_id());
+            *current = client->next;
+            delete client;
         } else {
-            ++it;
+            current = &client->next;
         }
     }
 }
@@ -393,9 +407,9 @@ void Server::loop() {
 PrintMux Server::get_subscribed(const char * topic) {
     TRACE_FUNCTION
     PrintMux ret;
-    for (auto & client_ptr : clients) {
-        if (client_ptr->get_subscription(topic)) {
-            ret.add(client_ptr->get_print());
+    for (Client * client = clients; client; client = client->next) {
+        if (client->get_subscription(topic)) {
+            ret.add(client->get_print());
         }
     }
     return ret;

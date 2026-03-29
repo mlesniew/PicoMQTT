@@ -2,8 +2,6 @@
 
 #include <Arduino.h>
 
-#include <list>
-
 #if defined(ESP32)
 #include <WiFi.h>
 #elif defined(ESP8266)
@@ -142,6 +140,8 @@ public:
 
         virtual SubscriptionId subscribe(const String & topic_filter) override;
 
+        Client * next;
+
     protected:
         Server & server;
         String client_id;
@@ -166,6 +166,8 @@ public:
     };
 
     Server(std::unique_ptr<ServerSocketInterface> socket);
+
+    virtual ~Server();
 
     Server(uint16_t port = 1883)
         : Server(new ServerSocket<::WiFiServer>(port)) {
@@ -217,7 +219,7 @@ protected:
     virtual PrintMux get_subscribed(const char * topic);
 
     std::unique_ptr<ServerSocketInterface> server;
-    std::list<std::unique_ptr<Client>> clients;
+    Client * clients;
 };
 
 class ServerLocalSubscribe : public Server {

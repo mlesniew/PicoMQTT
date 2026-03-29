@@ -25,7 +25,8 @@ const char * Subscriber::get_subscription_pattern(SubscriptionId id) const {
     return id ? id->topic.c_str() : nullptr;
 }
 
-Subscriber::SubscriptionId Subscriber::get_subscription(const char * topic) const {
+Subscriber::SubscriptionId Subscriber::get_subscription(
+    const char * topic) const {
     for (const Subscription * s = subscriptions; s; s = s->next) {
         if (topic_matches(s->topic.c_str(), topic)) {
             return s;
