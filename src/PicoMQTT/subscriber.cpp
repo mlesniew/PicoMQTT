@@ -93,37 +93,101 @@ String Subscriber::get_topic_element(const String & topic, size_t index) {
 }
 
 bool Subscriber::topic_matches(const char * p, const char * t) {
-    TRACE_FUNCTION;
-    // TODO: Special handling of the $ prefix
     while (true) {
-        switch (*p) {
-            case '\0':
-                // end of pattern reached
-                // TODO: check for '/#' suffix
-                return (*t == '\0');
+        if (*p == '#') {
+            return true;  // valid filter => '#' is terminal and matches
+                          // remainder
+        }
 
-            case '#':
-                // multilevel wildcard
-                if (*t == '\0') {
-                    return false;
-                }
-                return true;
+        if (*p == '\0') {
+            return *t == '\0';
+        }
 
-            case '+':
-                // single level wildcard
-                while (*t && *t != '/') {
-                    ++t;
-                }
-                ++p;
-                break;
+        if (*t == '\0') {
+            // allow parent-topic match: "home/#" matches "home"
+            return p[0] == '/' && p[1] == '#' && p[2] == '\0';
+        }
 
-            default:
-                // regular match
-                if (*p != *t) {
-                    return false;
-                }
-                ++p;
+        if (*p == '+') {
+            while (*t && *t != '/') {
                 ++t;
+            }
+            ++p;
+            continue;
+        }
+
+        if (*p != *t) {
+            return false;
+        }
+
+        ++p;
+        ++t;
+    }
+}
+
+bool Subscriber::is_valid_topic_filter(const char * topic_filter) {
+    TRACE_FUNCTION;
+    if (!topic_filter || topic_filter[0] == '\0') {
+        return false;
+    }
+
+    enum class State {
+        segment_start,
+        segment_cont,
+        separator,
+        end,
+    } state = State::segment_start;
+
+    for (;; ++topic_filter) {
+        switch (state) {
+            case State::segment_start:
+                switch (*topic_filter) {
+                    case '+':
+                        state = State::separator;
+                        break;
+                    case '#':
+                        state = State::end;
+                        break;
+                    case '/':
+                        // empty topic segment
+                        state = State::segment_start;
+                        break;
+                    case '\0':
+                        return true;
+                    default:
+                        state = State::segment_cont;
+                }
+                break;
+            case State::segment_cont:
+                switch (*topic_filter) {
+                    case '/':
+                        state = State::segment_start;
+                        break;
+                    case '\0':
+                        return true;
+                    case '+':
+                    case '#':
+                        // wildcards must occupy entire topic segment
+                        return false;
+                    default:
+                        break;
+                }
+                break;
+            case State::separator:
+                switch (*topic_filter) {
+                    case '/':
+                        state = State::segment_start;
+                        break;
+                    case '\0':
+                        return true;
+                    default:
+                        // single-level wildcard must be followed by topic
+                        // separator
+                        return false;
+                }
+                break;
+            case State::end:
+                return *topic_filter == '\0';
         }
     }
 }
@@ -140,6 +204,11 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, MessageCallback callback) {
     TRACE_FUNCTION;
+
+    if (!is_valid_topic_filter(topic_filter.c_str())) {
+        return nullptr;
+    }
+
     unsubscribe(topic_filter);
 
     SubscriptionWithCallback * node =

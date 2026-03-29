@@ -237,7 +237,9 @@ Client::SubscriptionId Client::subscribe(const String & topic_filter,
     TRACE_FUNCTION;
     const auto ret =
         SubscribedMessageListener::subscribe(topic_filter, callback);
-    BasicClient::subscribe(topic_filter);
+    if (ret) {
+        BasicClient::subscribe(topic_filter);
+    }
     return ret;
 }
 

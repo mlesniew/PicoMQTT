@@ -296,8 +296,12 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
                 on_protocol_violation();
                 return;
             }
-            this->subscribe(topic);
-            server.on_subscribe(client_id.c_str(), topic);
+            if (this->subscribe(topic)) {
+                server.on_subscribe(client_id.c_str(), topic);
+            } else {
+                suback_codes[suback_codes_count >> 3] |=
+                    1 << (suback_codes_count & 7);
+            }
         }
     }
 
@@ -351,6 +355,9 @@ void Server::Client::on_unsubscribe(IncomingPacket & unsubscribe) {
 Server::Client::SubscriptionId Server::Client::subscribe(
     const String & topic_filter) {
     TRACE_FUNCTION;
+    if (!is_valid_topic_filter(topic_filter.c_str())) {
+        return nullptr;
+    }
     unsubscribe(topic_filter);
     Subscription * node = new Subscription(topic_filter.c_str());
     insert_subscription(node);

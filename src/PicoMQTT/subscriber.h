@@ -35,6 +35,7 @@ public:
     virtual ~Subscriber();
 
     static bool topic_matches(const char * topic_filter, const char * topic);
+    static bool is_valid_topic_filter(const char * topic_filter);
     static String get_topic_element(const char * topic, size_t index);
     static String get_topic_element(const String & topic, size_t index);
 
