@@ -1,7 +1,5 @@
 #include "server.h"
 
-#include <list>
-
 #include "config.h"
 #include "debug.h"
 
@@ -225,14 +223,23 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
         return;
     }
 
-    std::list<uint8_t> suback_codes;
+    uint8_t suback_codes[(PICOMQTT_MAX_SUBSCRIPTIONS_PER_PACKET + 7) / 8] = {};
+    size_t suback_codes_count = 0;
 
-    while (subscribe.get_remaining_size()) {
+    for (; subscribe.get_remaining_size(); ++suback_codes_count) {
         const size_t topic_size = subscribe.read_u16();
-        if (topic_size > PICOMQTT_MAX_TOPIC_SIZE) {
+
+        if (suback_codes_count >= PICOMQTT_MAX_SUBSCRIPTIONS_PER_PACKET) {
+            // Too many subscriptions requested in one packet.
+            // Report subscription failure in SUBACK for the remaining ones.
+            subscribe.ignore(topic_size);
+            subscribe.read_u8();  // qos
+            continue;
+        } else if (topic_size > PICOMQTT_MAX_TOPIC_SIZE) {
             subscribe.ignore(topic_size);
             subscribe.read_u8();
-            suback_codes.push_back(0x80);
+            suback_codes[suback_codes_count >> 3] |=
+                1 << (suback_codes_count & 7);
         } else {
             char topic[topic_size + 1];
             if (!subscribe.read_string(topic, topic_size)) {
@@ -246,14 +253,23 @@ void Server::Client::on_subscribe(IncomingPacket & subscribe) {
             }
             this->subscribe(topic);
             server.on_subscribe(client_id.c_str(), topic);
-            suback_codes.push_back(0);
         }
     }
 
-    auto suback = build_packet(Packet::SUBACK, 0, 2 + suback_codes.size());
+    auto suback = build_packet(Packet::SUBACK, 0, 2 + suback_codes_count);
     suback.write_u16(message_id);
-    for (uint8_t code : suback_codes) {
-        suback.write_u8(code);
+    for (size_t i = 0; i < suback_codes_count; ++i) {
+        if (i >= PICOMQTT_MAX_SUBSCRIPTIONS_PER_PACKET) {
+            // Too many subscriptions requested in one packet.
+            // Report subscription failure in SUBACK for the remaining ones.
+            suback.write_u8(0x80);
+        } else if (suback_codes[i >> 3] & (1 << (i & 7))) {
+            // Subscription rejected due to topic filter too long.
+            suback.write_u8(0x80);
+        } else {
+            // Subscription accepted with QoS 0.
+            suback.write_u8(0x00);
+        }
     }
     suback.send();
 }
