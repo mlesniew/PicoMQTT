@@ -82,12 +82,44 @@ public:
 
 namespace PicoMQTT {
 
+Server::PrintMux::PrintMux(Server & server) : server(server) {}
+
+size_t Server::PrintMux::write(uint8_t c) {
+    TRACE_FUNCTION
+    for (Client * client = server.clients; client; client = client->next) {
+        if (client->subscribed) {
+            client->get_print().write(c);
+        }
+    }
+    return 1;
+}
+
+size_t Server::PrintMux::write(const uint8_t * buf, size_t size) {
+    TRACE_FUNCTION
+    for (Client * client = server.clients; client; client = client->next) {
+        if (client->subscribed) {
+            client->get_print().write(buf, size);
+        }
+    }
+    return size;
+}
+
+void Server::PrintMux::flush() {
+    TRACE_FUNCTION
+    for (Client * client = server.clients; client; client = client->next) {
+        if (client->subscribed) {
+            client->get_print().flush();
+        }
+    }
+}
+
 Server::Client::Client(Server & server, ::Client * client)
     : SocketOwner(client),
       Connection(*socket, 0, server.socket_timeout_millis),
+      next(nullptr),
+      subscribed(false),
       server(server),
-      client_id("<unknown>"),
-      next(nullptr) {
+      client_id("<unknown>") {
     TRACE_FUNCTION
     wait_for_reply(Packet::CONNECT, [this](IncomingPacket & packet) {
         TRACE_FUNCTION
@@ -378,9 +410,12 @@ Server::Server(std::unique_ptr<ServerSocketInterface> server)
     : keep_alive_tolerance_millis(10 * 1000),
       socket_timeout_millis(5 * 1000),
       server(std::move(server)),
-      clients(nullptr){TRACE_FUNCTION}
+      clients(nullptr),
+      print_mux(*this) {
+    TRACE_FUNCTION;
+}
 
-      Server::~Server() {
+Server::~Server() {
     Client * current = clients;
     while (current) {
         Client * next = current->next;
@@ -420,22 +455,22 @@ void Server::loop() {
     }
 }
 
-PrintMux Server::get_subscribed(const char * topic) {
+bool Server::set_subscribed(const char * topic) {
     TRACE_FUNCTION
-    PrintMux ret;
+    bool any_subscribed = false;
     for (Client * client = clients; client; client = client->next) {
-        if (client->get_subscription(topic)) {
-            ret.add(client->get_print());
-        }
+        client->subscribed = (client->get_subscription(topic) != nullptr);
+        any_subscribed |= client->subscribed;
     }
-    return ret;
+    return any_subscribed;
 }
 
 Publisher::Publish Server::begin_publish(const char * topic,
                                          const size_t payload_size, uint8_t,
                                          bool, uint16_t) {
     TRACE_FUNCTION
-    return Publish(*this, get_subscribed(topic), topic, payload_size);
+    set_subscribed(topic);
+    return Publish(*this, print_mux, topic, payload_size);
 }
 
 void Server::on_message(const char * topic, IncomingPacket & packet) {

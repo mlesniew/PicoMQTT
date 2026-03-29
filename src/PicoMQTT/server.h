@@ -141,6 +141,7 @@ public:
         virtual SubscriptionId subscribe(const String & topic_filter) override;
 
         Client * next;
+        bool subscribed;
 
     protected:
         Server & server;
@@ -198,6 +199,19 @@ public:
     unsigned long socket_timeout_millis;
 
 protected:
+    class PrintMux : public ::Print {
+    public:
+        PrintMux(Server & server);
+
+        virtual size_t write(uint8_t c) override final;
+
+        virtual size_t write(const uint8_t * buf, size_t size) override final;
+
+        virtual void flush() override final;
+
+        Server & server;
+    };
+
     Server(ServerSocketInterface * socket)
         : Server(std::unique_ptr<ServerSocketInterface>(socket)) {
         TRACE_FUNCTION
@@ -216,10 +230,11 @@ protected:
     virtual void on_subscribe(const char * client_id, const char * topic) {}
     virtual void on_unsubscribe(const char * client_id, const char * topic) {}
 
-    virtual PrintMux get_subscribed(const char * topic);
+    bool set_subscribed(const char * topic);
 
     std::unique_ptr<ServerSocketInterface> server;
     Client * clients;
+    PrintMux print_mux;
 };
 
 class ServerLocalSubscribe : public Server {

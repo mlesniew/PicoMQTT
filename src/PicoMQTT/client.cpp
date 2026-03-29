@@ -4,6 +4,15 @@
 
 namespace PicoMQTT {
 
+class DummyPrint : public Print {
+public:
+    virtual size_t write(uint8_t) override { return 1; }
+    virtual size_t write(const uint8_t * buffer, size_t size) override {
+        return size;
+    }
+    virtual void flush() override {}
+} dummy_print;
+
 BasicClient::BasicClient(::Client & client, unsigned long keep_alive_millis,
                          unsigned long socket_timeout_millis)
     : Connection(client, keep_alive_millis, socket_timeout_millis) {
@@ -117,9 +126,11 @@ Publisher::Publish BasicClient::begin_publish(const char * topic,
                                               uint8_t qos, bool retain,
                                               uint16_t message_id) {
     TRACE_FUNCTION
+
+    Print & print = client.connected() ? (Print &)client : (Print &)dummy_print;
+
     return Publish(
-        *this, client.connected() ? client : PrintMux(), topic, payload_size,
-        (qos >= 1) ? 1 : 0, retain,
+        *this, print, topic, payload_size, (qos >= 1) ? 1 : 0, retain,
         message_id,  // dup if message_id is non-zero
         message_id ? message_id
                    : message_id_generator

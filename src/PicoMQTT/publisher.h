@@ -6,7 +6,6 @@
 
 #include "debug.h"
 #include "outgoing_packet.h"
-#include "print_mux.h"
 
 namespace PicoMQTT {
 
@@ -14,19 +13,18 @@ class Publisher {
 public:
     class Publish : public OutgoingPacket {
     private:
-        Publish(Publisher & publisher, const PrintMux & print, uint8_t flags,
+        Publish(Publisher & publisher, Print & print, uint8_t flags,
                 size_t total_size, const char * topic, size_t topic_size,
                 uint16_t message_id);
 
     public:
-        Publish(Publisher & publisher, const PrintMux & print,
-                const char * topic, size_t topic_size, size_t payload_size,
-                uint8_t qos = 0, bool retain = false, bool dup = false,
-                uint16_t message_id = 0);
-
-        Publish(Publisher & publisher, const PrintMux & print,
-                const char * topic, size_t payload_size, uint8_t qos = 0,
+        Publish(Publisher & publisher, Print & print, const char * topic,
+                size_t topic_size, size_t payload_size, uint8_t qos = 0,
                 bool retain = false, bool dup = false, uint16_t message_id = 0);
+
+        Publish(Publisher & publisher, Print & print, const char * topic,
+                size_t payload_size, uint8_t qos = 0, bool retain = false,
+                bool dup = false, uint16_t message_id = 0);
 
         ~Publish();
 
@@ -34,7 +32,6 @@ public:
 
         const uint8_t qos;
         const uint16_t message_id;
-        PrintMux print;
         Publisher & publisher;
     };
 
