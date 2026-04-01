@@ -231,15 +231,13 @@ void SubscribedMessageListener::fire_message_callbacks(
     on_extra_message(topic, packet);
 }
 
-Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
-    const String & topic_filter,
-    std::function<void(char *, void *, size_t)> callback, size_t max_size) {
-    TRACE_FUNCTION;
-    return subscribe(topic_filter, [this, callback, max_size](
-                                       char * topic, IncomingPacket & packet) {
+template <typename Invoke>
+static SubscribedMessageListener::MessageCallback make_payload_callback(
+    SubscribedMessageListener * self, Invoke invoke, size_t max_size) {
+    return [self, invoke, max_size](char * topic, IncomingPacket & packet) {
         const size_t payload_size = packet.get_remaining_size();
         if (payload_size >= max_size) {
-            on_message_too_big(topic, packet);
+            self->on_message_too_big(topic, packet);
             return;
         }
         char payload[payload_size + 1];
@@ -249,20 +247,34 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
             return;
         }
         payload[payload_size] = '\0';
-        callback(topic, payload, payload_size);
-    });
+        invoke(topic, payload, payload_size);
+    };
+}
+
+Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
+    const String & topic_filter,
+    std::function<void(char *, void *, size_t)> callback, size_t max_size) {
+    TRACE_FUNCTION;
+    return subscribe(topic_filter,
+                     make_payload_callback(
+                         this,
+                         [callback](char * topic, char * payload, size_t size) {
+                             callback(topic, payload, size);
+                         },
+                         max_size));
 }
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, std::function<void(char *, char *)> callback,
     size_t max_size) {
     TRACE_FUNCTION;
-    return subscribe(
-        topic_filter,
-        [callback](char * topic, void * payload, size_t payload_size) {
-            callback(topic, (char *)payload);
-        },
-        max_size);
+    return subscribe(topic_filter,
+                     make_payload_callback(
+                         this,
+                         [callback](char * topic, char * payload, size_t) {
+                             callback(topic, payload);
+                         },
+                         max_size));
 }
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
@@ -271,22 +283,23 @@ Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     TRACE_FUNCTION;
     return subscribe(
         topic_filter,
-        [callback](char * topic, void * payload, size_t payload_size) {
-            callback((char *)payload);
-        },
-        max_size);
+        make_payload_callback(
+            this,
+            [callback](char *, char * payload, size_t) { callback(payload); },
+            max_size));
 }
 
 Subscriber::SubscriptionId SubscribedMessageListener::subscribe(
     const String & topic_filter, std::function<void(void *, size_t)> callback,
     size_t max_size) {
     TRACE_FUNCTION;
-    return subscribe(
-        topic_filter,
-        [callback](char * topic, void * payload, size_t payload_size) {
-            callback(payload, payload_size);
-        },
-        max_size);
+    return subscribe(topic_filter,
+                     make_payload_callback(
+                         this,
+                         [callback](char *, char * payload, size_t size) {
+                             callback(payload, size);
+                         },
+                         max_size));
 }
 
 }  // namespace PicoMQTT
