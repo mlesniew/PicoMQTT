@@ -397,6 +397,22 @@ PicoMQTT::Server mqtt(websocket_server);
 
 Full example available [here](examples/websocket_server/websocket_server.ino).
 
+## Building examples with just and dotenv
+
+Building an example requires setting `WIFI_SSID` and `WIFI_PASSWORD` environment variables.
+
+You can do this either with a local `.env` file (used by `just`) or directly from the command line.
+
+1. Copy `.env.example` to `.env`
+2. Set `WIFI_SSID` and `WIFI_PASSWORD`
+3. Build an example: `just build-example basic_client`
+
+Or, set variables directly in the command line, for example:
+
+`WIFI_SSID=MyWiFi WIFI_PASSWORD=secret just build-example basic_client`
+
+`WIFI_SSID=MyWiFi WIFI_PASSWORD=secret pio run -d examples/basic_client`
+
 ## Benchmarks
 
 Charts in this section show PicoMQTT how many messages a broker running on the ESP8266 and ESP32 was able to deliver per second per client depending on the payload size and the number of subscribed clients.

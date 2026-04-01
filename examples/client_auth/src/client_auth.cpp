@@ -1,17 +1,5 @@
 #include <PicoMQTT.h>
 
-#if __has_include("config.h")
-#include "config.h"
-#endif
-
-#ifndef WIFI_SSID
-#define WIFI_SSID "WiFi SSID"
-#endif
-
-#ifndef WIFI_PASSWORD
-#define WIFI_PASSWORD "password"
-#endif
-
 PicoMQTT::Client mqtt("broker.hivemq.com",  // broker address (or IP)
                       1883,                 // broker port (defaults to 1883)
                       "esp-client",         // Client ID
@@ -27,8 +15,8 @@ void setup() {
     Serial.begin(115200);
 
     // Connect to WiFi
-    Serial.printf("Connecting to WiFi %s\n", WIFI_SSID);
     WiFi.mode(WIFI_STA);
+    Serial.printf("Connecting to WiFi %s\n", WIFI_SSID);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED) {
         delay(1000);

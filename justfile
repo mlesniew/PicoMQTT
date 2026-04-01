@@ -1,4 +1,5 @@
 set shell := ["bash", "-euo", "pipefail", "-c"]
+set dotenv-load := true
 
 default:
     @just --list
@@ -14,6 +15,9 @@ build-example name:
 
 build-examples:
     @just list-examples | xargs -r -n1 just build-example
+
+clean:
+    rm -rf .pio examples/*/.pio
 
 format:
     find . \( -name '*.cpp' -o -name '*.h' \) -print0 | xargs -0 clang-format -i

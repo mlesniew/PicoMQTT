@@ -25,6 +25,12 @@
     "espressif8266",
     "espressif32"
   ],
+  "export": {
+    "exclude": [
+      ".env",
+      ".env.*"
+    ]
+  },
   "dependencies": {
   }
 }
