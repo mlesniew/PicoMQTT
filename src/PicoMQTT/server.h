@@ -10,6 +10,8 @@
 #error "This board is not supported."
 #endif
 
+#include <vector>
+
 #include "connection.h"
 #include "debug.h"
 #include "incoming_packet.h"
